@@ -1,46 +1,39 @@
 "use client";
+
 import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
+import { useSelector, useDispatch } from 'react-redux';
+import { useRouter } from 'next/navigation';
 import { performLogout } from '@/store/slices/authSlice';
-import Cookies from 'js-cookie';
+import { Button } from '@/components/ui/button';
+import { RootState } from '@/store/store';
 
 const ProtectedPage = () => {
-    const dispatch = useDispatch();
-    const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch();
+  const router = useRouter();
 
-    useEffect(() => {
-        const token = Cookies.get('token');
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/login');
+    }
+  }, [isAuthenticated, router]);
 
-        // Check if the cookie has expired
-        if (!token) {
-            dispatch(performLogout());
-            window.location.href = '/login';
-        }
-    }, [dispatch]);
+  const handleLogout = () => {
+    dispatch(performLogout());
+    router.push('/login');
+  };
 
-    // Function to handle logout
-    const handleLogout = () => {
-        dispatch(performLogout());
-        window.location.href = '/login'; // Redirect after logout
-    };
-
-    return (
-        <div>
-            <h1>Protected Page</h1>
-            {isAuthenticated ? (
-                <>
-                  <p>You are logged in.</p>
-                  <button onClick={handleLogout}>Logout</button>
-                </>
-            ) : (
-                <>
-                  <p>You are not authenticated.</p>
-                  <button onClick={handleLogout}>Logout</button>
-                </>
-            )}
-        </div>
-    );
+  return (
+    <div className="flex h-screen items-center justify-center">
+      <div>
+        <h2 className="text-2xl font-bold">Welcome, User</h2>
+        <Button className="mt-4" onClick={handleLogout}>
+          Logout
+        </Button>
+      </div>
+    </div>
+  );
 };
 
 export default ProtectedPage;
