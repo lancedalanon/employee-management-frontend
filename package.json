@@ -11,17 +11,23 @@
   "dependencies": {
     "@reduxjs/toolkit": "^2.3.0",
     "axios": "^1.7.7",
+    "crypto-js": "^4.2.0",
+    "jsonwebtoken": "^9.0.2",
     "next": "14.2.15",
+    "next-cookies": "^2.0.3",
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "^7.53.0",
     "react-redux": "^9.1.2",
+    "redux-thunk": "^3.1.0",
     "yup": "^1.4.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/react": "^16.0.1",
     "@testing-library/user-event": "^14.5.2",
+    "@types/crypto-js": "^4.2.2",
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
