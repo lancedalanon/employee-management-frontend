@@ -1,53 +1,43 @@
-import axios from 'axios';
+import axios, { InternalAxiosRequestConfig } from 'axios'; 
+import CookieUtils from '@/app/utils/useCookies';
+import { redirect } from 'next/navigation';
 
-// Utility function to extract a cookie value by its name
-const getCookie = (name) => {
-  const cookies = `; ${document.cookie}`;
-  const cookieParts = cookies.split(`; ${name}=`);
-  if (cookieParts.length === 2) {
-    return cookieParts.pop().split(';').shift();
-  }
-  return null;
-};
-
-// Utility function to remove the token and log out the user
-const logoutUser = () => {
-  // Remove token from cookies by setting it to expire
-  document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-  
-  // Redirect to login page (or other appropriate action)
-  window.location.href = '/login'; // Modify as needed for your app's routing
-};
-
-// Function to add Authorization header if token is available
-const attachAuthToken = (config) => {
-  const token = getCookie('token'); // Get token from cookies
-  if (token) {
-    config.headers['Authorization'] = `Bearer ${token}`; // Attach token to header
-  }
-  return config;
-};
-
-// Handle request errors (optional but useful for debugging)
-const handleRequestError = (error) => Promise.reject(error);
-
-// Handle token expiration (401) and log the user out
-const handleResponseError = (error) => {
-  if (error.response && error.response.status === 401) {
-    logoutUser(); // If token is invalid or expired, log the user out
-  }
-  return Promise.reject(error); // Propagate other errors
-};
-
-// Create an axios instance with a base URL
-const apiClient = axios.create({
-  baseURL: process.env.LARAVEL_PUBLIC_LINK || 'https://employee-management-backend-3asm.onrender.com',
+// Create an Axios instance
+const axiosInstance = axios.create({
+    baseURL: process.env.NEXT_PUBLIC_LARAVEL_API_BASE_URL,
+    withCredentials: true,
 });
 
-// Intercept requests to attach token if available
-apiClient.interceptors.request.use(attachAuthToken, handleRequestError);
+// Interceptor to check for token before each request
+axiosInstance.interceptors.request.use(
+    (config: InternalAxiosRequestConfig) => {
+        const token = CookieUtils.getCookie('token');
 
-// Intercept responses to handle authentication errors (like expired tokens)
-apiClient.interceptors.response.use((response) => response, handleResponseError);
+        // Token is missing, handle logout
+        if (!token) {
+            handleLogout();
+            return Promise.reject(new Error('No token, user is logged out.'));
+        }
 
-export default apiClient;
+        config.headers['Authorization'] = `Bearer ${token}`;
+        config.headers['Accept'] = 'application/json';
+
+        return config;
+    },
+    (error) => {
+        // Handle request error
+        return Promise.reject(error);
+    }
+);
+
+// Logout function
+const handleLogout = () => {
+    // Remove token cookie
+    CookieUtils.deleteCookie('token', { path: '/' });
+
+    // Redirect to the login page
+    redirect('/login');
+};
+
+// Export the configured Axios instance
+export default axiosInstance;

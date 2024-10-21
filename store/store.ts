@@ -1,7 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
+import authReducer from './authSlice';
+import userReducer from './userSlice';
 
 const store = configureStore({
-  reducer: {},
+  reducer: {
+    auth: authReducer,
+    user: userReducer,
+  },
 });
 
 // Export the type of the root state and dispatch
