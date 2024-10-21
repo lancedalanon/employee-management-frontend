@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import axiosInstance from '@/axios';
 import { RootState } from '@/store/store';
 
 // Define the state interface
@@ -37,7 +38,7 @@ export const login = createAsyncThunk(
 // Define async thunk for logout, also using axios without the interceptor
 export const logout = createAsyncThunk('auth/logout', async (_, { rejectWithValue }) => {
   try {
-    await axios.post(`${process.env.NEXT_PUBLIC_LARAVEL_API_BASE_URL}/v1/logout`, 
+    await axiosInstance.post(`${process.env.NEXT_PUBLIC_LARAVEL_API_BASE_URL}/v1/logout`, 
       {
         withCredentials: true,
       });

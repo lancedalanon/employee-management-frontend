@@ -24,6 +24,7 @@ const ProfilePage: React.FC = () => {
 
   // Logout handler
   const handleLogout = async () => {
+    await dispatch(logout());
     CookieUtils.deleteCookie('token', { path: '/' });
     router.push('/login');
   };
