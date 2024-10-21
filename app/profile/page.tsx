@@ -2,16 +2,17 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchUser, selectUserState } from '@/store/userSlice';
+import { AppDispatch } from '@/store/store';
 import { logout } from '@/store/authSlice';
 import useAuthCheck from '@/app/hooks/useAuthCheck';
 import CookieUtils from '@/app/utils/useCookies';
 import { useRouter } from 'next/navigation';
 
 const ProfilePage: React.FC = () => {
-  // Check if the user is authenticated
-  useAuthCheck();
+  // Check if the user is authenticated and has the specified roles
+  useAuthCheck(['employee', 'intern', 'company_admin']);
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { user, loading, error } = useSelector(selectUserState);
   const router = useRouter();
 
@@ -25,8 +26,8 @@ const ProfilePage: React.FC = () => {
   // Logout handler
   const handleLogout = async () => {
     await dispatch(logout());
-    CookieUtils.deleteCookie('token', { path: '/' });
-    router.push('/login');
+    CookieUtils.deleteCookie('userData', { path: '/' });
+    router.push('/auth/login');
   };
 
   return (

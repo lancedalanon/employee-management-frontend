@@ -1,11 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import axiosInstance from '@/axios';
 import { RootState } from '@/store/store';
 
 // Define the state interface
 interface AuthState {
-  user: null | { email: string };
+  user: null | { username: string };
   loading: boolean;
   error: string | null;
   isAuthenticated: boolean;
@@ -29,8 +29,13 @@ export const login = createAsyncThunk(
           withCredentials: true,
         });
       return response.data; 
-    } catch (error: any) {
-      return rejectWithValue(error.response.data); // Handle error response
+    } catch (error) {
+      // Handle Axios error
+      if (error instanceof AxiosError && error.response) {
+        return rejectWithValue(error.response.data);
+      }
+      // Handle generic error case if not an AxiosError
+      return rejectWithValue('An unexpected error occurred');
     }
   }
 );
@@ -43,8 +48,13 @@ export const logout = createAsyncThunk('auth/logout', async (_, { rejectWithValu
         withCredentials: true,
       });
     return true;
-  } catch (error: any) {
-    return rejectWithValue(error.response.data); // Handle error response
+  } catch (error) {
+    // Handle Axios error
+    if (error instanceof AxiosError && error.response) {
+      return rejectWithValue(error.response.data);
+    }
+    // Handle generic error case if not an AxiosError
+    return rejectWithValue('An unexpected error occurred');
   }
 });
 

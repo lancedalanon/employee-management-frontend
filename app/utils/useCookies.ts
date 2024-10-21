@@ -8,8 +8,10 @@ class CookieUtils {
      * @param value - The value of the cookie.
      * @param options - Additional options for the cookie (e.g., expires, path, domain, secure).
      */
-    static setCookie(name: string, value: string, options?: CookieOptions): void {
-        let cookieString = `${encodeURIComponent(name)}=${encodeURIComponent(value)}`;
+    static setCookie<T>(name: string, value: string | T[], options?: CookieOptions): void {
+        // Convert array to JSON string if value is an array
+        const valueString = Array.isArray(value) ? JSON.stringify(value) : String(value);
+        let cookieString = `${encodeURIComponent(name)}=${encodeURIComponent(valueString)}`;
 
         if (options) {
             if (options.expires) {

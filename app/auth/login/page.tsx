@@ -44,8 +44,16 @@ const Login: React.FC = () => {
     // Check if login was successful
     if (login.fulfilled.match(result)) {
       // Set the token in cookies
-      const { token } = result.payload.data;
-      CookieUtils.setCookie('token', token, { path: '/', secure: true, sameSite: 'Strict' });
+      const { user_id, token, roles } = result.payload.data;
+
+      // Create a user data object
+      const userData = {
+        user_id,
+        token,
+        roles,
+      };
+
+      CookieUtils.setCookie('userData', JSON.stringify(userData), { path: '/', secure: true, sameSite: 'Strict' });
 
       // Redirect to protected page after successful login
       router.push('/profile');

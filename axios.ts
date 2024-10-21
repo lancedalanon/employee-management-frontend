@@ -11,15 +11,31 @@ const axiosInstance = axios.create({
 // Interceptor to check for token before each request
 axiosInstance.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
-        const token = CookieUtils.getCookie('token');
+        const userData = CookieUtils.getCookie('userData');
 
         // Token is missing, handle logout
-        if (!token) {
+        if (!userData) {
             handleLogout();
             return Promise.reject(new Error('No token, user is logged out.'));
         }
 
-        config.headers['Authorization'] = `Bearer ${token}`;
+        // Parse userData to get the token
+        let parsedUserData: { token?: string; };
+        try {
+            parsedUserData = JSON.parse(userData);
+        } catch {
+            handleLogout();
+            return Promise.reject(new Error('Failed to parse user data.'));
+        }
+
+        // Check if token is available
+        if (!parsedUserData.token) {
+            handleLogout();
+            return Promise.reject(new Error('No token found in user data.'));
+        }
+
+        // Set the Authorization header
+        config.headers['Authorization'] = `Bearer ${parsedUserData.token}`;
         config.headers['Accept'] = 'application/json';
 
         return config;
@@ -33,7 +49,7 @@ axiosInstance.interceptors.request.use(
 // Logout function
 const handleLogout = () => {
     // Remove token cookie
-    CookieUtils.deleteCookie('token', { path: '/' });
+    CookieUtils.deleteCookie('userData', { path: '/' });
 
     // Redirect to the login page
     redirect('/login');
