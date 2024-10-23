@@ -1,11 +1,8 @@
 import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import CookieUtils from '@/app/utils/useCookies';
-import { AppDispatch } from '@/store/store';
 
 const useAlreadyAuthRedirect = () => {
-  const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
 
   useEffect(() => {
@@ -14,15 +11,19 @@ const useAlreadyAuthRedirect = () => {
 
     // If token is found, redirect to the profile page
     if (userData) {
-      // Parse user data from the cookie and check if the user has employee or intern roles
-      const parsedUserData = JSON.parse(userData);
+      try {
+        // Parse user data from the cookie
+        const parsedUserData = JSON.parse(userData);
 
-      // Redirect to the profile page if the user has employee or intern roles
-      if (parsedUserData.roles.includes(['employee', 'intern', 'company_admin'])) {
-        router.push('/profile');
+        // Redirect to the profile page if the user has the required roles
+        if (parsedUserData) {
+          router.push('/profile');
+        }
+      } catch (error) {
+        console.error('Error parsing user data:', error);
       }
     }
-  }, [dispatch, router]);
+  }, [router]);
 };
 
 export default useAlreadyAuthRedirect;
