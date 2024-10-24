@@ -6,6 +6,7 @@ import { login, selectAuthState } from '@/store/authSlice';
 import CookieUtils from '@/app/utils/useCookies';
 import { useRouter } from 'next/navigation';
 import useAlreadyAuthRedirect from '@/app/hooks/useAlreadyAuthRedirect';
+import Link from 'next/link';
 
 interface LoginFormData {
   username: string;
@@ -101,6 +102,16 @@ const Login: React.FC = () => {
               required
             />
           </div>
+
+          {/* Sign-up instead link */}
+          <div className="flex justify-end w-full text-indigo-500 mb-4">
+            <Link 
+              href="/auth/register"
+            >
+              Don&apos;t have an account yet?
+            </Link>
+          </div>
+
           <button
             type="submit"
             className="w-full px-4 py-2 text-white bg-indigo-500 rounded-md hover:bg-indigo-600 focus:ring-4 focus:ring-indigo-200 focus:ring-opacity-50"
