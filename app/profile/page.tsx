@@ -7,7 +7,8 @@ import { logout } from '@/store/authSlice';
 import useAuthCheck from '@/app/hooks/useAuthCheck';
 import CookieUtils from '@/app/utils/useCookies';
 import { useRouter } from 'next/navigation';
-import { User } from '@/types/userTypes'; // Assuming you have a User type defined
+import { User } from '@/types/userTypes';
+import SidebarLayout from '@/components/SidebarLayout';
 
 const ProfilePage: React.FC = () => {
   // Check if the user is authenticated and has the specified roles
@@ -54,29 +55,31 @@ const ProfilePage: React.FC = () => {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="max-w-2xl p-8 bg-white shadow-md rounded-lg">
-        {loading && <p className="text-gray-600">Loading user data...</p>}
-        {error && <p className="text-red-500">{error}</p>}
-        {user && (
-          <>
-            <h1 className="text-3xl font-bold text-gray-800 mb-4">
-              Welcome, {user.username}!
-            </h1>
-            <p className="text-gray-600">
-              This is a protected page that only authenticated users can access.
-            </p>
-            <button 
-              type="button"
-              onClick={handleLogout} 
-              className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
-            >
-              Logout
-            </button>
-          </>
-        )}
+    <SidebarLayout>
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="max-w-2xl p-8 bg-white shadow-md rounded-lg">
+          {loading && <p className="text-gray-600">Loading user data...</p>}
+          {error && <p className="text-red-500">{error}</p>}
+          {user && (
+            <>
+              <h1 className="text-3xl font-bold text-gray-800 mb-4">
+                Welcome, {user.username}!
+              </h1>
+              <p className="text-gray-600">
+                This is a protected page that only authenticated users can access.
+              </p>
+              <button 
+                type="button"
+                onClick={handleLogout} 
+                className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+              >
+                Logout
+              </button>
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </SidebarLayout>
   );
 };
 
