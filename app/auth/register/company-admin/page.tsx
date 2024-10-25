@@ -5,6 +5,12 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import Link from 'next/link';
 import { IoIosArrowRoundBack } from "react-icons/io";
+import { registerCompanyAdmin } from "@/store/registrationSlice";
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '@/store/store';
+import CookieUtils from '@/app/utils/useCookies';
+import { useRouter } from 'next/navigation';
+import useAlreadyAuthRedirect from '@/app/hooks/useAlreadyAuthRedirect';
 
 // Step-specific interfaces for the registration form
 interface PersonalInfo {
@@ -16,8 +22,8 @@ interface PersonalInfo {
   date_of_birth: Date;
   gender: string;
   phone_number: string;
+  email: string;
 }
-
 interface CompanyInfo {
   company_name: string;
   company_registration_number: string;
@@ -80,6 +86,11 @@ const personalInfoSchema: yup.ObjectSchema<PersonalInfo> = yup.object().shape({
     .required('Phone number is required')
     .matches(/^09\d{2}-\d{3}-\d{4}$/, 'Phone number must be in the format 09XX-XXX-XXXX')
     .max(13, 'Phone number must be at most 13 characters long'),
+  email: yup
+    .string()
+    .email('Invalid email format')
+    .required('Email is required')
+    .max(255),
 });
 
 // Validation schema for company information (Step 2)
@@ -156,8 +167,14 @@ const accountInfoSchema: yup.ObjectSchema<AccountInfo> = yup.object().shape({
     .required('Please confirm your password'),
 });
 
-const Registration: React.FC = () => {
+const CompanyAdminRegistration: React.FC = () => {
   const [step, setStep] = useState(1); // State to track the current step of the form
+  const dispatch = useDispatch<AppDispatch>();
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  // Call the hook to check if user is already logged in
+  useAlreadyAuthRedirect();
 
   // Get validation schema based on the current step
   const getValidationSchema = (step: number): yup.ObjectSchema<RegistrationFormData> => {
@@ -194,10 +211,28 @@ const Registration: React.FC = () => {
 
   // Submit handler for the form
   const onSubmit: SubmitHandler<RegistrationFormData> = async (data) => {
+    setLoading(true); // Set loading to true when form is being submitted
     const submissionData = { ...data };
 
-    // Perform final form submission logic here
-    console.log('Form data:', submissionData);
+    try {
+      // Dispatch registerCompanyAdmin action with form data and unwrap the result
+      const result = await dispatch(registerCompanyAdmin(submissionData)).unwrap();
+
+      // If successful, extract payload data
+      const { user_id, token, roles } = result.data;
+
+      // Save user data in cookies
+      const userData = { user_id, token, roles };
+      CookieUtils.setCookie('userData', JSON.stringify(userData), { path: '/', secure: true, sameSite: 'Strict' });
+
+      // Redirect to profile page
+      router.push('/profile');
+    } catch (error) {
+      // Handle error if registration fails
+      console.error('Registration failed:', error);
+    } finally {
+      setLoading(false); // Set loading to false after registration finishes
+    }
   };
 
   return (
@@ -331,6 +366,21 @@ const Registration: React.FC = () => {
                     placeholder="Enter your phone number"
                   />
                   {errors.phone_number && <p className="text-red-500">{errors.phone_number.message}</p>}
+                </div>
+
+                {/* Email Field */}
+                <div className="mb-4">
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-600">
+                    Email
+                  </label>
+                  <input
+                    type="text"
+                    id="email"
+                    {...register('email')}
+                    className="mt-1 px-4 py-2 w-full border rounded-md focus:ring focus:ring-indigo-200 focus:outline-none"
+                    placeholder="Enter your email"
+                  />
+                  {errors.email && <p className="text-red-500">{errors.email.message}</p>}
                 </div>
               </div>
 
@@ -600,12 +650,16 @@ const Registration: React.FC = () => {
                 </Link>
               </div>
 
-              <div className="flex justify-between w-full">
+              {/* Buttons */}
+              <div className="flex justify-between">
                 {/* Back Button */}
                 <button
                   type="button"
                   onClick={handleBack}
-                  className="w-full px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:ring-4 focus:ring-gray-200 mr-2"
+                  className={`w-full px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:ring-4 focus:ring-gray-200 mr-2 ${
+                    loading ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                  disabled={loading} // Disable the button during form submission
                 >
                   Back
                 </button>
@@ -613,9 +667,12 @@ const Registration: React.FC = () => {
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  className="w-full px-4 py-2 text-white bg-indigo-500 rounded-md hover:bg-indigo-600 focus:ring-4 focus:ring-indigo-200"
+                  className={`w-full px-4 py-2 text-white bg-indigo-500 rounded-md hover:bg-indigo-600 focus:ring-4 focus:ring-indigo-200 ${
+                    loading ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                  disabled={loading} // Disable the button during form submission
                 >
-                  Submit
+                  {loading ? 'Submitting...' : 'Submit'} {/* Show "Submitting..." while loading */}
                 </button>
               </div>
             </>
@@ -626,4 +683,4 @@ const Registration: React.FC = () => {
   );
 };
 
-export default Registration;
+export default CompanyAdminRegistration;

@@ -1,27 +1,41 @@
 "use client";
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchUser, selectUserState } from '@/store/userSlice';
+import React, { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { fetchUser } from '@/store/userSlice';
 import { AppDispatch } from '@/store/store';
 import { logout } from '@/store/authSlice';
 import useAuthCheck from '@/app/hooks/useAuthCheck';
 import CookieUtils from '@/app/utils/useCookies';
 import { useRouter } from 'next/navigation';
+import { User } from '@/types/userTypes'; // Assuming you have a User type defined
 
 const ProfilePage: React.FC = () => {
   // Check if the user is authenticated and has the specified roles
   useAuthCheck(['employee', 'intern', 'company_admin']);
 
   const dispatch = useDispatch<AppDispatch>();
-  const { user, loading, error } = useSelector(selectUserState);
   const router = useRouter();
 
-  // Fetch user data when the component mounts and if user is not already fetched
+  // Local state to manage user data, loading, and error states
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
-    if (!user) {
-      dispatch(fetchUser());
-    }
-  }, [dispatch, user]);
+    const loadUserData = async () => {
+      try {
+        setLoading(true);
+        const fetchedUser = await dispatch(fetchUser()).unwrap();
+        setUser(fetchedUser);
+      } catch (err) {
+        setError(err as string || 'Failed to fetch user data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUserData();
+  }, [dispatch]);
 
   // Logout handler
   const handleLogout = async () => {
@@ -29,6 +43,15 @@ const ProfilePage: React.FC = () => {
     CookieUtils.deleteCookie('userData', { path: '/' });
     router.push('/auth/login');
   };
+
+  // Optionally handle loading and error states
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">

@@ -43,10 +43,7 @@ export const login = createAsyncThunk(
 // Define async thunk for logout, also using axios without the interceptor
 export const logout = createAsyncThunk('auth/logout', async (_, { rejectWithValue }) => {
   try {
-    await axiosInstance.post(`${process.env.NEXT_PUBLIC_LARAVEL_API_BASE_URL}/v1/logout`, 
-      {
-        withCredentials: true,
-      });
+    await axiosInstance.post(`/v1/logout`);
     return true;
   } catch (error) {
     // Handle Axios error
