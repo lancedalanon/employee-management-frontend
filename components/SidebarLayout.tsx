@@ -1,13 +1,41 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { LuArrowLeftToLine, LuArrowRightToLine } from "react-icons/lu";
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '@/store/store';
+import Avatar from './Avatar'; 
+import { useRouter } from 'next/navigation';
+import LogoutDropdown from './LogoutDropdown';
+import { logout } from '@/store/authSlice';
+import { clearUserData } from '@/store/userSlice';
+import CookieUtils from '@/app/utils/useCookies';
 
 interface LayoutProps {
   children: ReactNode;
 }
 
 const SidebarLayout: React.FC<LayoutProps> = ({ children }) => {
-  // State to manage sidebar visibility
+  // State to manage sidebar visibility and loading
   const [isMinimized, setIsMinimized] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const username = useSelector((state: RootState) => state.user.username);
+  const avatarUrl = useSelector((state: RootState) => state.user.avatarUrl); // Assuming avatarUrl is part of the user state
+  const router = useRouter();
+  const dispatch = useDispatch();
+
+  // Effect to set loading to false once username is available
+  useEffect(() => {
+    if (username !== null) {
+      setIsLoading(false);
+    }
+  }, [username]);
+
+  // Logout handler
+  const handleLogout = async () => {
+    await dispatch(clearUserData());
+    await dispatch(logout());
+    CookieUtils.deleteCookie('userData', { path: '/' });
+    router.push('/auth/login');
+  };
 
   // Toggle sidebar visibility
   const toggleSidebar = () => {
@@ -50,7 +78,13 @@ const SidebarLayout: React.FC<LayoutProps> = ({ children }) => {
             )}
           </button>
 
-          <span className="text-lg text-light">Hi User!</span>
+          <div className="flex items-center">
+            <span className="text-lg text-light mr-2">
+              Hello, {isLoading ? 'Loading...' : username ? username : 'Guest'}!
+            </span>
+            <Avatar src={avatarUrl} alt="User Avatar" size={32} />
+            <LogoutDropdown onLogout={handleLogout} />
+          </div>
         </div>
 
         {/* Scrollable content */}

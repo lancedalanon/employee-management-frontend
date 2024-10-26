@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axiosInstance from '@/axios';
 import { RootState } from '@/store/store';
 import { AxiosError } from 'axios';
@@ -7,12 +7,14 @@ import { User } from '@/types/userTypes';
 // Define the initial state for the user slice
 interface UserState {
     user: User | null;
+    username: string | null;
     loading: boolean;
     error: string | null;
 }
 
 const initialState: UserState = {
     user: null,
+    username: null,
     loading: false,
     error: null,
 };
@@ -40,7 +42,17 @@ const userSlice = createSlice({
     name: 'user',
     initialState,
     reducers: {
+        setUsername(state, action: PayloadAction<string | null>) {
+            state.username = action.payload;
+        },
         clearUserError(state) {
+            state.error = null;
+        },
+        // New reducer to clear user data
+        clearUserData(state) {
+            state.user = null;
+            state.username = null;
+            state.loading = false;
             state.error = null;
         },
     },
@@ -53,6 +65,7 @@ const userSlice = createSlice({
             .addCase(fetchUser.fulfilled, (state, action) => {
                 state.loading = false;
                 state.user = action.payload;
+                state.username = action.payload.username; // Assuming the user has a username field
             })
             .addCase(fetchUser.rejected, (state, action) => {
                 state.loading = false;
@@ -62,6 +75,6 @@ const userSlice = createSlice({
 });
 
 // Export actions and reducer
-export const { clearUserError } = userSlice.actions;
+export const { clearUserError, setUsername, clearUserData } = userSlice.actions; 
 export const selectUserState = (state: RootState) => state.user;
 export default userSlice.reducer;

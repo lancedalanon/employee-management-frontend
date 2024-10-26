@@ -1,12 +1,9 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { fetchUser } from '@/store/userSlice';
+import { fetchUser, setUsername } from '@/store/userSlice';
 import { AppDispatch } from '@/store/store';
-import { logout } from '@/store/authSlice';
 import useAuthCheck from '@/app/hooks/useAuthCheck';
-import CookieUtils from '@/app/utils/useCookies';
-import { useRouter } from 'next/navigation';
 import { User } from '@/types/userTypes';
 import SidebarLayout from '@/components/SidebarLayout';
 
@@ -15,7 +12,6 @@ const ProfilePage: React.FC = () => {
   useAuthCheck(['employee', 'intern', 'company_admin']);
 
   const dispatch = useDispatch<AppDispatch>();
-  const router = useRouter();
 
   // Local state to manage user data, loading, and error states
   const [user, setUser] = useState<User | null>(null);
@@ -28,6 +24,7 @@ const ProfilePage: React.FC = () => {
         setLoading(true);
         const fetchedUser = await dispatch(fetchUser()).unwrap();
         setUser(fetchedUser);
+        dispatch(setUsername(fetchedUser.username));
       } catch (err) {
         setError(err as string || 'Failed to fetch user data');
       } finally {
@@ -37,13 +34,6 @@ const ProfilePage: React.FC = () => {
 
     loadUserData();
   }, [dispatch]);
-
-  // Logout handler
-  const handleLogout = async () => {
-    await dispatch(logout());
-    CookieUtils.deleteCookie('userData', { path: '/' });
-    router.push('/auth/login');
-  };
 
   return (
     <SidebarLayout>
@@ -59,13 +49,6 @@ const ProfilePage: React.FC = () => {
               <p className="text-onsurface">
                 This is a protected page that only authenticated users can access.
               </p>
-              <button 
-                type="button"
-                onClick={handleLogout} 
-                className="mt-4 px-4 py-2 bg-error text-white rounded transition"
-              >
-                Logout
-              </button>
             </>
           )}
         </div>
