@@ -6,14 +6,20 @@ const config: Config = {
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        primary: '#1F2937',
+        error: '#B00020',
+        background: '#FFFFFF',
+        surface: '#FFFFFF',
+        onbackground: '#000000',
+        onsurface: '#000000',
       },
     },
   },
   plugins: [],
 };
+
 export default config;
