@@ -9,6 +9,12 @@ import { clearUserData } from '@/store/userSlice';
 import LogoutDropdown from '@/components/LogoutDropdown';
 import CookieUtils from '@/app/utils/useCookies';
 import { GiHamburgerMenu } from "react-icons/gi";
+import Link from "next/link";
+import { HiCube } from "react-icons/hi2";
+import { IoPersonCircle, IoLogOut } from "react-icons/io5";
+import { BiSolidSpreadsheet } from "react-icons/bi";
+import { AiFillProject } from "react-icons/ai";
+import { RiCalendarScheduleFill } from "react-icons/ri";
 
 interface LayoutProps {
   children: ReactNode;
@@ -83,19 +89,46 @@ const SidebarLayout: React.FC<LayoutProps> = ({ children }) => {
   }, []);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen overflow-y-hidden">
       {/* Sidebar - visible on larger screens */}
       <aside
-        className={`bg-primary flex flex-col p-4 fixed h-full text-white transition-all duration-300 ease-in-out transform z-20 ${
+        className={`bg-primary flex flex-col fixed h-full text-white transition-all duration-300 ease-in-out transform z-20 ${
           isMinimized ? "w-16" : "w-64"
         } hidden md:flex`}
       >
-        <h1 className={`text-xl font-bold mb-4 ${isMinimized ? "hidden" : ""}`}>
-          Employee Management
-        </h1>
+        <div className="p-4 flex items-center">
+          <HiCube size={48} className={`${isMinimized ? "" : "mr-2"}`} />
+          <h1 className={`text-lg font-bold ${isMinimized ? "hidden" : ""}`}>
+            Employee Management System
+          </h1>
+        </div>
 
-        <nav className={`flex flex-col space-y-2 mt-4 ${isMinimized ? "hidden" : ""}`}>
-          <a href="/profile" className="text-lg">Profile</a>
+        <nav className="flex flex-col space-y-2 p-4">
+          <Link href="/profile" className="flex items-center text-lg">
+            <IoPersonCircle size={36} className={`mr-2 ${isMinimized ? "mr-0" : ""}`} />
+            <span className={`${isMinimized ? "hidden" : ""}`}>Profile</span>
+          </Link>
+        </nav>
+
+        <nav className="flex flex-col space-y-2 p-4">
+          <Link href="/daily-time-record" className="flex items-center text-lg">
+            <BiSolidSpreadsheet size={36} className={`mr-2 ${isMinimized ? "mr-0" : ""}`} />
+            <span className={`${isMinimized ? "hidden" : ""}`}>Daily Time Record</span>
+          </Link>
+        </nav>
+
+        <nav className="flex flex-col space-y-2 p-4">
+          <Link href="/projects" className="flex items-center text-lg">
+            <AiFillProject size={36} className={`mr-2 ${isMinimized ? "mr-0" : ""}`} />
+            <span className={`${isMinimized ? "hidden" : ""}`}>Projects</span>
+          </Link>
+        </nav>
+
+        <nav className="flex flex-col space-y-2 p-4">
+          <Link href="/leave-requests" className="flex items-center text-lg">
+            <RiCalendarScheduleFill size={36} className={`mr-2 ${isMinimized ? "mr-0" : ""}`} />
+            <span className={`${isMinimized ? "hidden" : ""}`}>Leave Requests</span>
+          </Link>
         </nav>
       </aside>
 
@@ -104,8 +137,8 @@ const SidebarLayout: React.FC<LayoutProps> = ({ children }) => {
         <div className="fixed inset-0 bg-primary bg-opacity-50 z-40 flex">
           {/* Offcanvas Sidebar */}
           <div className="bg-primary w-64 h-full text-white flex flex-col">
-            <div className="flex justify-between items-center p-4">
-              <h1 className="text-xl font-bold">Employee Management</h1>
+            <div className="flex justify-between items-center p-4 border-b">
+              <h1 className="text-xl font-bold">Employee Management System</h1>
               {/* Close button with "X" */}
               <button
                 onClick={closeOffcanvas}
@@ -116,13 +149,33 @@ const SidebarLayout: React.FC<LayoutProps> = ({ children }) => {
               </button>
             </div>
             
-            <nav className="flex flex-col space-y-2 mt-4 mb-auto px-4">
-              <a href="/profile" className="text-lg">Profile</a>
-            </nav>
+            <nav className="flex flex-col space-y-8 mt-4 p-4">
+              <Link href="/profile" className="flex items-center text-lg">
+                <IoPersonCircle size={36} className="mr-2" />
+                <span>Profile</span>
+              </Link>
 
-            <nav className="text-lg mt-auto p-4">
-              Logout
+              <Link href="/daily-time-record" className="flex items-center text-lg">
+                <BiSolidSpreadsheet size={36} className="mr-2" />
+                <span>Daily Time Record</span>
+              </Link>
+
+              <Link href="/projects" className="flex items-center text-lg">
+                <AiFillProject size={36} className="mr-2" />
+                <span>Projects</span>
+              </Link>
+
+              <Link href="/leave-requests" className="flex items-center text-lg">
+                <RiCalendarScheduleFill size={36} className="mr-2" />
+                <span>Leave Requests</span>
+              </Link>
             </nav>
+            <div className="p-4 border-t mt-auto">
+              <Link href="#" onClick={handleLogout} className="flex items-center text-lg">
+                <IoLogOut size={36} className="mr-2" />
+                <span>Logout</span>
+              </Link>
+            </div>
           </div>
         </div>
       )}
@@ -134,7 +187,7 @@ const SidebarLayout: React.FC<LayoutProps> = ({ children }) => {
         }`}
       >
         {/* Top bar with User Greeting */}
-        <div className="flex justify-between items-center bg-primary text-white p-4 sticky top-0 z-30">
+        <div className={`flex justify-between items-center bg-primary text-white ${ isMinimized ? "py-6" : "py-7"} px-4 sticky top-0 z-30`}>
           {/* Sidebar toggle button on larger screens */}
           <button
             className="text-white hidden md:flex"
@@ -174,7 +227,7 @@ const SidebarLayout: React.FC<LayoutProps> = ({ children }) => {
         </div>
 
         {/* Scrollable content */}
-        <div className="overflow-y-auto h-[calc(100vh-64px)]">
+        <div className="flex-1 p-4 overflow-y-auto max-h-[calc(100vh-160px)]">
           {children}
         </div>
       </main>
