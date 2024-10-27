@@ -180,25 +180,24 @@ const SidebarLayout: React.FC<LayoutProps> = ({ children }) => {
         </div>
       )}
 
-      {/* Main Content */}
       <main
-        className={`flex-1 bg-secondary transition-all duration-300 ease-in-out ${
+        className={`flex flex-col w-full   bg-secondary transition-all duration-300 ease-in-out ${
           isMinimized ? "md:ml-16" : "md:ml-64"
         }`}
       >
         {/* Top bar with User Greeting */}
-        <div className={`flex justify-between items-center bg-primary text-white ${ isMinimized ? "py-6" : "py-7"} px-4 sticky top-0 z-30`}>
+        <div
+          className={`flex justify-between items-center bg-primary text-white ${
+            isMinimized ? "py-6" : "py-7"
+          } px-4 sticky w-full top-0 z-30`}
+        >
           {/* Sidebar toggle button on larger screens */}
           <button
             className="text-white hidden md:flex"
             onClick={toggleSidebar}
             aria-label={isMinimized ? "Expand sidebar" : "Minimize sidebar"}
           >
-            {isMinimized ? (
-              <LuArrowRightToLine size={28} />
-            ) : (
-              <LuArrowLeftToLine size={28} />
-            )}
+            {isMinimized ? <LuArrowRightToLine size={28} /> : <LuArrowLeftToLine size={28} />}
           </button>
 
           {/* Hamburger menu button for mobile */}
@@ -227,7 +226,7 @@ const SidebarLayout: React.FC<LayoutProps> = ({ children }) => {
         </div>
 
         {/* Scrollable content */}
-        <div className="flex-1 p-4 overflow-y-auto max-h-[calc(100vh-160px)]">
+        <div className="flex-1 p-4 overflow-y-auto h-auto">
           {children}
         </div>
       </main>
