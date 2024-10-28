@@ -89,10 +89,10 @@ const SidebarLayout: React.FC<LayoutProps> = ({ children }) => {
   }, []);
 
   return (
-    <div className="flex min-h-screen overflow-y-hidden">
+    <div className="flex h-screen overflow-y-hidden">
       {/* Sidebar - visible on larger screens */}
       <aside
-        className={`bg-primary flex flex-col fixed h-full text-white transition-all duration-300 ease-in-out transform z-20 ${
+        className={`bg-primary flex flex-col h-full text-white transition-all duration-300 ease-in-out transform z-20 ${
           isMinimized ? "w-16" : "w-64"
         } hidden md:flex`}
       >
@@ -180,16 +180,12 @@ const SidebarLayout: React.FC<LayoutProps> = ({ children }) => {
         </div>
       )}
 
-      <main
-        className={`flex flex-col w-full   bg-secondary transition-all duration-300 ease-in-out ${
-          isMinimized ? "md:ml-16" : "md:ml-64"
-        }`}
-      >
+      <div className="flex-1 flex flex-col">
         {/* Top bar with User Greeting */}
         <div
-          className={`flex justify-between items-center bg-primary text-white ${
-            isMinimized ? "py-6" : "py-7"
-          } px-4 sticky w-full top-0 z-30`}
+          className={`flex justify-between items-center bg-primary text-white fixed top-0 z-50 transition-all duration-300 p-6 w-full ${
+            isMinimized ? "md:w-[calc(100%-4rem)]" : "md:w-[calc(100%-16rem)]"
+          }`}
         >
           {/* Sidebar toggle button on larger screens */}
           <button
@@ -225,11 +221,15 @@ const SidebarLayout: React.FC<LayoutProps> = ({ children }) => {
           </div>
         </div>
 
-        {/* Scrollable content */}
-        <div className="flex-1 p-4 overflow-y-auto h-auto">
-          {children}
-        </div>
-      </main>
+        <main
+          className={`flex-1 bg-secondary transition-all duration-300 ease-in-out`}
+        >
+          {/* Scrollable content */}
+          <div className="p-4 overflow-y-auto h-auto mt-28">
+            {children}
+          </div>
+        </main>
+      </div>
     </div>
   );
 };
