@@ -1,6 +1,3 @@
-"use client";
-import React from 'react';
-
 interface FieldDisplayProps {
   label: string;
   value: string;
@@ -12,7 +9,7 @@ const InputFieldDisplay: React.FC<FieldDisplayProps> = ({ label, value }) => (
       {label}
     </label>
     <p className="text-onsurface text-md md:text-lg text-wrap" aria-label={label}>
-      {value}
+      {value || 'N/A'}
     </p>
   </div>
 );

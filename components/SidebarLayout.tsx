@@ -89,15 +89,15 @@ const SidebarLayout: React.FC<LayoutProps> = ({ children }) => {
   }, []);
 
   return (
-    <div className="flex h-screen overflow-y-hidden">
+    <div className="flex min-h-screen">
       {/* Sidebar - visible on larger screens */}
       <aside
-        className={`bg-primary flex flex-col h-full text-white transition-all duration-300 ease-in-out transform z-20 ${
+        className={`bg-primary min-h-screen flex flex-col h-full text-white transition-all duration-300 ease-in-out transform sticky left-0 top-0 z-20 ${
           isMinimized ? "w-16" : "w-64"
         } hidden md:flex`}
       >
         <div className="p-4 flex items-center">
-          <HiCube size={48} className={`${isMinimized ? "" : "mr-2"}`} />
+          <HiCube size={48} className={`${isMinimized ? "" : "mr-2"}`} /> 
           <h1 className={`text-lg font-bold ${isMinimized ? "hidden" : ""}`}>
             Employee Management System
           </h1>
@@ -134,7 +134,7 @@ const SidebarLayout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Offcanvas menu for mobile */}
       {isOffcanvasOpen && (
-        <div className="fixed inset-0 bg-primary bg-opacity-50 z-40 flex">
+        <div className="fixed inset-0 bg-primary bg-opacity-50 z-50 flex">
           {/* Offcanvas Sidebar */}
           <div className="bg-primary w-64 h-full text-white flex flex-col">
             <div className="flex justify-between items-center p-4 border-b">
@@ -183,7 +183,7 @@ const SidebarLayout: React.FC<LayoutProps> = ({ children }) => {
       <div className="flex-1 flex flex-col">
         {/* Top bar with User Greeting */}
         <div
-          className={`flex justify-between items-center bg-primary text-white fixed top-0 z-50 transition-all duration-300 p-6 w-full ${
+          className={`flex justify-between items-center bg-primary text-white fixed top-0 z-20 transition-all duration-300 p-6 w-full ${
             isMinimized ? "md:w-[calc(100%-4rem)]" : "md:w-[calc(100%-16rem)]"
           }`}
         >
