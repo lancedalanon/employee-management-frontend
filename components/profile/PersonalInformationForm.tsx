@@ -7,9 +7,13 @@ import * as yup from 'yup';
 import FieldDisplay from '@/components/profile/InputFieldDisplay';
 import Button from '@/components/Button';
 import InputField from '@/components/InputField';
+import { updatePersonalInformation } from '@/store/userSlice';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '@/store/store';
 
 interface PersonalInformationFormProps {
   user: User;
+  onRefresh: () => void;
 }
 
 type FormValues = {
@@ -62,9 +66,10 @@ const schema: yup.ObjectSchema<FormValues> = yup.object().shape({
     .oneOf(['Male', 'Female'], 'Gender must be either Male or Female'),
 });
 
-const PersonalInformationForm: React.FC<PersonalInformationFormProps> = ({ user }) => {
+const PersonalInformationForm: React.FC<PersonalInformationFormProps> = ({ user, onRefresh }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [isModified, setIsModified] = useState(false); // Track if the form is modified
+  const [isModified, setIsModified] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
 
   const { control, handleSubmit, formState: { errors }, reset, watch } = useForm<FormValues>({
     resolver: yupResolver(schema),
@@ -97,20 +102,36 @@ const PersonalInformationForm: React.FC<PersonalInformationFormProps> = ({ user 
     setIsModified(JSON.stringify(formValues) !== JSON.stringify(initialValues));
   }, [formValues, user]);
 
-  const onSubmit = (data: FormValues) => {
-    console.log("Form submitted:", data);
-    // Perform your submission logic here...
+  const onSubmit = async (data: FormValues) => {
+    try {
+      await dispatch(updatePersonalInformation(data)).unwrap();
+      
+      reset();
+      setIsModified(false);
+      setIsEditing(false);
+      onRefresh(); // Trigger refresh of user data
+    } catch (error) {
+      console.error("Error updating personal information:", error);
+    }
+  };  
 
-    // Reset form and state
-    reset();
-    setIsModified(false); // Reset modified state after successful submission
-    setIsEditing(false);
-  };
+  // Reset form values when the user prop updates (after data refresh)
+  useEffect(() => {
+    reset({
+      first_name: user.first_name,
+      middle_name: user.middle_name || null,
+      last_name: user.last_name,
+      suffix: user.suffix || null,
+      place_of_birth: user.place_of_birth,
+      date_of_birth: user.date_of_birth,
+      gender: user.gender,
+    });
+  }, [user, reset]);
 
   const handleCancel = () => {
     setIsEditing(false);
-    reset(); // Reset form values
-    setIsModified(false); // Reset modified state on cancel
+    reset();
+    setIsModified(false);
   };
 
   return (

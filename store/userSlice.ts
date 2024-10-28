@@ -19,6 +19,16 @@ const initialState: UserState = {
     error: null,
 };
 
+type PersonalInformationFormValues = {
+    first_name: string;
+    middle_name?: string | null;
+    last_name: string;
+    suffix?: string | null;
+    place_of_birth: string;
+    date_of_birth: string;
+    gender: string;
+};
+
 // Create async thunk to fetch user data
 export const fetchUser = createAsyncThunk<User, void>(
     'user/fetchUser',
@@ -37,6 +47,23 @@ export const fetchUser = createAsyncThunk<User, void>(
     }
 );
 
+// Create async thunk to update personal information data
+export const updatePersonalInformation = createAsyncThunk<User, PersonalInformationFormValues>(
+    'user/updatePersonalInformation',
+    async (data, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.put('/v1/users/personal-information', data);
+            return response.data.data;
+        } catch (error) {
+            if (error instanceof AxiosError && error.response) {
+                return rejectWithValue(error.response.data || 'Failed to update personal information data');
+            } else {
+                return rejectWithValue('An unexpected error occurred');
+            }
+        }
+    }
+);
+
 // Create user slice
 const userSlice = createSlice({
     name: 'user',
@@ -48,7 +75,6 @@ const userSlice = createSlice({
         clearUserError(state) {
             state.error = null;
         },
-        // New reducer to clear user data
         clearUserData(state) {
             state.user = null;
             state.username = null;
@@ -65,7 +91,7 @@ const userSlice = createSlice({
             .addCase(fetchUser.fulfilled, (state, action) => {
                 state.loading = false;
                 state.user = action.payload;
-                state.username = action.payload.username; // Assuming the user has a username field
+                state.username = action.payload.username;
             })
             .addCase(fetchUser.rejected, (state, action) => {
                 state.loading = false;

@@ -22,28 +22,34 @@ const ProfilePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadUserData = async () => {
-      setLoading(true);
-      try {
-        const fetchedUser = await dispatch(fetchUser()).unwrap();
-        setUser(fetchedUser);
-        dispatch(setUsername(fetchedUser.username));
-      } catch (err) {
-        setError((err as Error)?.message || 'Failed to fetch user data');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadUserData();
   }, [dispatch]);
+
+  // Function to load or refresh user data
+  const loadUserData = async () => {
+    setLoading(true);
+    try {
+      const fetchedUser = await dispatch(fetchUser()).unwrap();
+      setUser(fetchedUser);
+      dispatch(setUsername(fetchedUser.username));
+    } catch (err) {
+      setError((err as Error)?.message || 'Failed to fetch user data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Function to handle data refresh, which can be passed as a prop
+  const handleDataRefresh = () => {
+    loadUserData();
+  };
 
   return (
     <SidebarLayout>
       {loading && <Spinner message="Loading user data..." />}
       {error && <ErrorAlert message={error} />}
       {user && <>
-        <PersonalInformationForm user={user} />
+        <PersonalInformationForm user={user} onRefresh={handleDataRefresh} />
         <ContactInformationForm user={user} />
         <ApiKeyForm />
         <ChangePasswordForm />
