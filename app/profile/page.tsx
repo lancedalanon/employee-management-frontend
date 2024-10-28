@@ -50,7 +50,7 @@ const ProfilePage: React.FC = () => {
       {error && <ErrorAlert message={error} />}
       {user && <>
         <PersonalInformationForm user={user} onRefresh={handleDataRefresh} />
-        <ContactInformationForm user={user} />
+        <ContactInformationForm user={user} onRefresh={handleDataRefresh} />
         <ApiKeyForm />
         <ChangePasswordForm />
       </>}

@@ -29,6 +29,25 @@ type PersonalInformationFormValues = {
     gender: string;
 };
 
+type ContactInformationFormValues = {
+    username: string;
+    email: string;
+    recovery_email?: string | null;
+    phone_number: string;
+    emergency_contact_name?: string | null;
+    emergency_contact_number?: string | null;
+};
+
+type ApiKeyFormValues = {
+    api_key: string;
+};
+
+type ChangePasswordFormValues = {
+    old_password: string;
+    new_password: string;
+    new_password_confirmation: string;
+};
+
 // Create async thunk to fetch user data
 export const fetchUser = createAsyncThunk<User, void>(
     'user/fetchUser',
@@ -57,6 +76,57 @@ export const updatePersonalInformation = createAsyncThunk<User, PersonalInformat
         } catch (error) {
             if (error instanceof AxiosError && error.response) {
                 return rejectWithValue(error.response.data || 'Failed to update personal information data');
+            } else {
+                return rejectWithValue('An unexpected error occurred');
+            }
+        }
+    }
+);
+
+// Create async thunk to update contact information data
+export const updateContactInformation = createAsyncThunk<User, ContactInformationFormValues>(
+    'user/updateContactInformation',
+    async (data, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.put('/v1/users/contact-information', data);
+            return response.data.data;
+        } catch (error) {
+            if (error instanceof AxiosError && error.response) {
+                return rejectWithValue(error.response.data || 'Failed to update contact information data');
+            } else {
+                return rejectWithValue('An unexpected error occurred');
+            }
+        }
+    }
+);
+
+// Create async thunk to update api key data
+export const updateApiKey = createAsyncThunk<User, ApiKeyFormValues>(
+    'user/updateApiKey',
+    async (data, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.put('/v1/users/api-key', data);
+            return response.data.data;
+        } catch (error) {
+            if (error instanceof AxiosError && error.response) {
+                return rejectWithValue(error.response.data || 'Failed to update api key data');
+            } else {
+                return rejectWithValue('An unexpected error occurred');
+            }
+        }
+    }
+);
+
+// Create async thunk to update password
+export const updatePassword = createAsyncThunk<User, ChangePasswordFormValues>(
+    'user/updatePassword',
+    async (data, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.put('/v1/users/password', data);
+            return response.data.data;
+        } catch (error) {
+            if (error instanceof AxiosError && error.response) {
+                return rejectWithValue(error.response.data || 'Failed to update password');
             } else {
                 return rejectWithValue('An unexpected error occurred');
             }
