@@ -1,60 +1,55 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { fetchUser, setUsername } from '@/store/userSlice';
+import { fetchDtrs } from '@/store/dtrSlice';
 import { AppDispatch } from '@/store/store';
 import useAuthCheck from '@/app/hooks/useAuthCheck';
-import { User } from '@/types/userTypes';
+import { Dtr, PaginatedDtrResponse } from '@/types/dtrTypes'; 
 import SidebarLayout from '@/components/SidebarLayout';
+import DataTable from '@/components/DataTable';
 
-const ProfilePage: React.FC = () => {
-  // Check if the user is authenticated and has the specified roles
+const DtrPage: React.FC = () => {
+  // Check user authorization
   useAuthCheck(['employee', 'intern', 'company_admin']);
 
   const dispatch = useDispatch<AppDispatch>();
 
-  // Local state to manage user data, loading, and error states
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  // State variable for DTR data
+  const [dtr, setDtr] = useState<Dtr[]>([]);
 
-  useEffect(() => {
-    const loadUserData = async () => {
-      try {
-        setLoading(true);
-        const fetchedUser = await dispatch(fetchUser()).unwrap();
-        setUser(fetchedUser);
-        dispatch(setUsername(fetchedUser.username));
-      } catch (err) {
-        setError(err as string || 'Failed to fetch user data');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadUserData();
-  }, [dispatch]);
+  // Fetch DTR data from API
+  const fetchDtrData = async (params: Record<string, unknown>): Promise<PaginatedDtrResponse> => {
+    // Fetch the DTR data and unwrap the response
+    const response: PaginatedDtrResponse = await dispatch(fetchDtrs(params)).unwrap();
+    // Set the DTR data in state
+    setDtr(response.data);
+    console.log(response);
+    return response;
+  };
 
   return (
     <SidebarLayout>
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="max-w-2xl p-8 shadow-lg rounded-lg bg-surface border">
-          {loading && <p className="text-onsurface">Loading user data...</p>}
-          {error && <p className="text-red-500">{error}</p>}
-          {user && (
-            <>
-              <h1 className="text-3xl font-bold text-onsurface mb-4">
-                Welcome, {user.username}!
-              </h1>
-              <p className="text-onsurface">
-                This is a protected page that only authenticated users can access.
-              </p>
-            </>
-          )}
-        </div>
-      </div>
+      <DataTable
+        data={dtr}
+        columns={[
+          { key: 'dtr_id', label: 'DTR ID' },
+          { key: 'dtr_time_in', label: 'Time In' },
+          { key: 'dtr_time_out', label: 'Time Out' },
+          { 
+            key: 'dtr_end_of_the_day_report', 
+            label: 'End of The Day Report',
+            render: (item: Dtr) => (item.dtr_is_overtime ? item.dtr_end_of_the_day_report : 'N/A'),
+          },
+          { 
+            key: 'dtr_is_overtime', 
+            label: 'Overtime',
+            render: (item: Dtr) => (item.dtr_is_overtime ? 'Yes' : 'No'),
+          },
+        ]}
+        fetchData={fetchDtrData} 
+      />
     </SidebarLayout>
   );
 };
 
-export default ProfilePage;
+export default DtrPage;
