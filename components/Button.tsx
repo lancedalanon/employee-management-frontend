@@ -6,7 +6,7 @@ interface ButtonProps {
   label: string; 
   onClick?: () => void; 
   size?: 'sm' | 'md' | 'lg'; 
-  variant?: 'primary' | 'secondary' | 'danger'; 
+  variant?: 'primary' | 'secondary' | 'danger' | 'success'; 
   className?: string; 
   disabled?: boolean; 
 }
@@ -27,6 +27,7 @@ const Button: React.FC<ButtonProps> = ({
   };
   const variantStyles = {
     primary: 'bg-blue-500 text-white hover:bg-blue-600',
+    success: 'bg-green-500 text-white hover:bg-green-600',
     secondary: 'bg-gray-500 text-white hover:bg-gray-600',
     danger: 'bg-red-500 text-white hover:bg-red-600',
   };

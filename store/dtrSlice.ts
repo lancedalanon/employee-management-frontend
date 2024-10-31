@@ -38,6 +38,78 @@ export const fetchDtrs = createAsyncThunk<PaginatedDtrResponse, Record<string, u
     }
 );
 
+// Async thunk to store DTR time-in
+export const storeTimeIn = createAsyncThunk<PaginatedDtrResponse, void>(
+    'dtr/storeTimeIn',
+    async (_, { rejectWithValue }) => {
+        try {
+            // Perform POST request to '/v1/dtrs/time-in' endpoint
+            const response = await axiosInstance.post('/v1/dtrs/time-in');
+
+            // Return the response data structure as PaginatedDtrResponse
+            return response.data as PaginatedDtrResponse;
+        } catch (error) {
+            // Handle errors
+            if (error instanceof AxiosError && error.response) {
+                return rejectWithValue(error.response.data || 'Failed to store DTR time-in');
+            } else {
+                return rejectWithValue('An unexpected error occurred');
+            }
+        }
+    }
+);
+
+// Async thunk to store DTR time-out
+export const storeTimeOut = createAsyncThunk<void, void>(
+    'dtr/storeTimeOut',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.post('/v1/dtrs/time-out');
+            return response.data;
+        } catch (error) {
+            if (error instanceof AxiosError && error.response) {
+                return rejectWithValue(error.response.data || 'Failed to store DTR time-out');
+            } else {
+                return rejectWithValue('An unexpected error occurred');
+            }
+        }
+    }
+);
+
+// Async thunk to store DTR break
+export const storeBreak = createAsyncThunk<void, void>(
+    'dtr/storeBreak',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.post('/v1/dtrs/break');
+            return response.data;
+        } catch (error) {
+            if (error instanceof AxiosError && error.response) {
+                return rejectWithValue(error.response.data || 'Failed to store DTR break');
+            } else {
+                return rejectWithValue('An unexpected error occurred');
+            }
+        }
+    }
+);
+
+// Async thunk to store DTR resume
+export const storeResume = createAsyncThunk<void, void>(
+    'dtr/storeResume',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.post('/v1/dtrs/resume');
+            return response.data;
+        } catch (error) {
+            if (error instanceof AxiosError && error.response) {
+                return rejectWithValue(error.response.data || 'Failed to store DTR resume');
+            } else {
+                return rejectWithValue('An unexpected error occurred');
+            }
+        }
+    }
+);
+
 // Create DTR slice
 const dtrSlice = createSlice({
     name: 'dtr',
