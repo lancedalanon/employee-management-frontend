@@ -16,6 +16,12 @@ const initialState: DtrState = {
     error: null,
 };
 
+interface DtrFormData {
+    dtr_time_in_image?: Blob;
+    dtr_time_out_image?: Blob;
+    end_of_the_day_images?: File[];
+}
+
 // Create async thunk to fetch DTR data
 export const fetchDtrs = createAsyncThunk<PaginatedDtrResponse, Record<string, unknown>>(
     'dtr/fetchDtrs',
@@ -39,12 +45,12 @@ export const fetchDtrs = createAsyncThunk<PaginatedDtrResponse, Record<string, u
 );
 
 // Async thunk to store DTR time-in
-export const storeTimeIn = createAsyncThunk<PaginatedDtrResponse, void>(
+export const storeTimeIn = createAsyncThunk<PaginatedDtrResponse, DtrFormData>(
     'dtr/storeTimeIn',
-    async (_, { rejectWithValue }) => {
+    async (formData, { rejectWithValue }) => {
         try {
-            // Perform POST request to '/v1/dtrs/time-in' endpoint
-            const response = await axiosInstance.post('/v1/dtrs/time-in');
+            // Perform POST request to '/v1/dtrs/time-in' endpoint with FormData
+            const response = await axiosInstance.post('/v1/dtrs/time-in', formData);
 
             // Return the response data structure as PaginatedDtrResponse
             return response.data as PaginatedDtrResponse;
@@ -60,12 +66,12 @@ export const storeTimeIn = createAsyncThunk<PaginatedDtrResponse, void>(
 );
 
 // Async thunk to store DTR time-out
-export const storeTimeOut = createAsyncThunk<void, void>(
+export const storeTimeOut = createAsyncThunk<PaginatedDtrResponse, DtrFormData>(
     'dtr/storeTimeOut',
-    async (_, { rejectWithValue }) => {
+    async (formData, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.post('/v1/dtrs/time-out');
-            return response.data;
+            const response = await axiosInstance.post('/v1/dtrs/time-out', formData);
+            return response.data as PaginatedDtrResponse;
         } catch (error) {
             if (error instanceof AxiosError && error.response) {
                 return rejectWithValue(error.response.data || 'Failed to store DTR time-out');

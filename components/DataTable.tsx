@@ -1,5 +1,5 @@
 "use client";
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import React, { ChangeEvent, useEffect } from 'react';
 import { format } from 'date-fns';
 
 // Define props interface for DataTable
@@ -11,19 +11,38 @@ interface DataTableProps<T> {
     render?: (item: T) => React.ReactNode; 
   }[];
   fetchData: (params: { page: number; perPage: number; sort: string; order: string; searchTerm: string }) => Promise<{ data: T[]; last_page: number; next_page_url: string | null }>;
+  currentPage: number;
+  itemsPerPage: number;
+  sort: string;
+  order: string;
+  searchTerm: string;
+  setCurrentPage: (page: number) => void;
+  setItemsPerPage: (perPage: number) => void;
+  setSort: (sort: string) => void;
+  setOrder: (order: string) => void;
+  setSearchTerm: (term: string) => void;
 }
 
 // DataTable component
-const DataTable = <T,>({ data, columns, fetchData }: DataTableProps<T>) => {
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(5);
-  const [sort, setSort] = useState<string>('dtr_id');
-  const [order, setOrder] = useState<string>('desc');
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [lastPage, setLastPage] = useState<number>(1);
-  const [nextPageAvailable, setNextPageAvailable] = useState<boolean>(true);
+const DataTable = <T,>({
+  data,
+  columns,
+  fetchData,
+  currentPage,
+  itemsPerPage,
+  sort,
+  order,
+  searchTerm,
+  setCurrentPage,
+  setItemsPerPage,
+  setSort,
+  setOrder,
+  setSearchTerm
+}: DataTableProps<T>) => {
+  const [loading, setLoading] = React.useState<boolean>(true);
+  const [error, setError] = React.useState<string | null>(null);
+  const [lastPage, setLastPage] = React.useState<number>(1);
+  const [nextPageAvailable, setNextPageAvailable] = React.useState<boolean>(true);
 
   // Function to format date using date-fns
   const formatDate = (dateString: string) => {
@@ -58,12 +77,6 @@ const DataTable = <T,>({ data, columns, fetchData }: DataTableProps<T>) => {
   // Handle pagination
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-  };
-
-  // Handle items per page selection
-  const handlePerPageChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    setItemsPerPage(Number(event.target.value));
-    setCurrentPage(1); // Reset to first page
   };
 
   // Generate pagination buttons based on the current state
@@ -103,7 +116,7 @@ const DataTable = <T,>({ data, columns, fetchData }: DataTableProps<T>) => {
         <div className="flex space-x-4 mb-4 md:mb-0">
           <label className="text-gray-700">
             Items per page:
-            <select value={itemsPerPage} onChange={handlePerPageChange} className="ml-2 p-1 border rounded">
+            <select value={itemsPerPage} onChange={(e) => setItemsPerPage(Number(e.target.value))} className="ml-2 p-1 border rounded">
               {[5, 10, 25, 50].map((option) => (
                 <option key={option} value={option}>{option}</option>
               ))}
