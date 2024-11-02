@@ -3,13 +3,15 @@ import authReducer from './authSlice';
 import userReducer from './userSlice';
 import registrationReducer from './registrationSlice';
 import dtrReducer from './dtrSlice';
+import leaveRequestReducer from './leaveRequestSlice';
 
 const store = configureStore({
   reducer: {
     auth: authReducer,
     user: userReducer,
     registration: registrationReducer,
-    dtr: dtrReducer,
+    dtr: dtrReducer,    
+    leaveRequest: leaveRequestReducer,
   },
 });
 

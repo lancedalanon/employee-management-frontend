@@ -153,17 +153,17 @@ const DataTable = <T,>({
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={columns.length} className="py-2 text-center text-gray-500">Loading...</td>
+                <td colSpan={columns.length} className="py-2 text-center text-gray-500 break-all">Loading...</td>
               </tr>
             ) : error ? (
               <tr>
-                <td colSpan={columns.length} className="py-2 text-center text-red-500">{error}</td>
+                <td colSpan={columns.length} className="py-2 text-center text-red-500 break-all">{error}</td>
               </tr>
             ) : data.length > 0 ? (
                 data.map((entry, index) => (
                     <tr key={String(entry[columns[0].key])} className={`hover:bg-gray-100 ${index % 2 === 0 ? 'bg-gray-50' : ''}`}>
                       {columns.map(column => (
-                        <td key={String(column.key)} className="py-2 px-4 border-b text-gray-800 text-center">
+                        <td key={String(column.key)} className="py-2 px-4 border-b text-gray-800 text-center break-all">
                           {column.render ? column.render(entry) : 
                             // Check if the entry is a date string and format it
                             typeof entry[column.key] === 'string' && !isNaN(Date.parse(entry[column.key] as string)) 

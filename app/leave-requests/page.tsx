@@ -1,11 +1,12 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { fetchUser, setUsername } from '@/store/userSlice';
+import { fetchLeaveRequests } from '@/store/leaveRequestSlice';
+import { LeaveRequest, PaginatedLeaveRequestResponse } from '@/types/leaveRequestTypes';
 import { AppDispatch } from '@/store/store';
+import { useDispatch } from 'react-redux';
 import useAuthCheck from '@/app/hooks/useAuthCheck';
-import { User } from '@/types/userTypes';
 import SidebarLayout from '@/components/SidebarLayout';
+import DataTable from '@/components/DataTable';
 
 const ProfilePage: React.FC = () => {
   // Check if the user is authenticated and has the specified roles
@@ -13,45 +14,61 @@ const ProfilePage: React.FC = () => {
 
   const dispatch = useDispatch<AppDispatch>();
 
-  // Local state to manage user data, loading, and error states
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  // Pagination variables
+  const [data, setData] = useState<PaginatedLeaveRequestResponse[]>([]);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
+  const [sort, setSort] = useState<string>('dtr_id');
+  const [order, setOrder] = useState<string>('desc');
+  const [searchTerm, setSearchTerm] = useState<string>('');
+
+  const fetchData = async (params: Record<string, unknown>): Promise<PaginatedLeaveRequestResponse> => {
+    try {
+      const response: PaginatedLeaveRequestResponse = await dispatch(fetchLeaveRequests(params)).unwrap();
+      setData(response.data);
+      return response;
+    } catch (error) {
+      console.error("Failed to fetch leave request data:", error);
+      throw error;
+    }
+  };
 
   useEffect(() => {
-    const loadUserData = async () => {
-      try {
-        setLoading(true);
-        const fetchedUser = await dispatch(fetchUser()).unwrap();
-        setUser(fetchedUser);
-        dispatch(setUsername(fetchedUser.username));
-      } catch (err) {
-        setError(err as string || 'Failed to fetch user data');
-      } finally {
-        setLoading(false);
-      }
+    const loadData = async () => {
+      const result = await fetchData({ page: currentPage, perPage: itemsPerPage, sort, order, searchTerm });
+      setData(result.data);
     };
 
-    loadUserData();
-  }, [dispatch]);
+    loadData();
+  }, [currentPage, itemsPerPage, sort, order, searchTerm]);
 
   return (
     <SidebarLayout>
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="max-w-2xl p-8 shadow-lg rounded-lg bg-surface border">
-          {loading && <p className="text-onsurface">Loading user data...</p>}
-          {error && <p className="text-red-500">{error}</p>}
-          {user && (
-            <>
-              <h1 className="text-3xl font-bold text-onsurface mb-4">
-                Welcome, {user.username}!
-              </h1>
-              <p className="text-onsurface">
-                This is a protected page that only authenticated users can access.
-              </p>
-            </>
-          )}
-        </div>
+      <div className="w-full p-4 shadow-lg rounded-lg bg-surface border mb-8">
+        <DataTable
+          data={data}
+          columns={[
+            { key: 'dtr_id', label: 'Leave Request ID' },
+            { key: 'dtr_absence_date', label: 'Absence Date' },
+            { key: 'dtr_absence_reason', label: 'Reason' },
+            {
+              key: 'dtr_absence_approved_at',
+              label: 'Approved At',
+              render: (item: LeaveRequest) => (item.dtr_absence_approved_at ? item.dtr_absence_approved_at : 'Not Yet Approved'),
+            },
+          ]}
+          fetchData={fetchData}
+          currentPage={currentPage}
+          itemsPerPage={itemsPerPage}
+          sort={sort}
+          order={order}
+          searchTerm={searchTerm}
+          setCurrentPage={setCurrentPage}
+          setItemsPerPage={setItemsPerPage}
+          setSort={setSort}
+          setOrder={setOrder}
+          setSearchTerm={setSearchTerm}
+        />
       </div>
     </SidebarLayout>
   );

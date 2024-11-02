@@ -215,7 +215,7 @@ const DtrPage: React.FC = () => {
       <SidebarLayout>
         <div className="w-full p-4 shadow-lg rounded-lg bg-surface border mb-8">
           <div className="flex flex-wrap justify-between items-center">
-            <h1><span className="font-bold">Current Time:</span> {currentTime}</h1>
+            <h2><span className="font-bold">Current Time:</span> {currentTime}</h2>
             <div className="flex space-x-4 mt-2 md:mt-0">
               <Button type="button" label="Time In" onClick={() => handleAction("timeIn")} variant="success" size="md" />
               <Button type="button" label="Break" onClick={() => handleAction("break")} variant="secondary" size="md" />

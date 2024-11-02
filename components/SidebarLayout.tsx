@@ -1,3 +1,4 @@
+"use client";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { LuArrowLeftToLine, LuArrowRightToLine } from "react-icons/lu";
 import { useSelector, useDispatch } from 'react-redux';
@@ -10,11 +11,11 @@ import LogoutDropdown from '@/components/LogoutDropdown';
 import CookieUtils from '@/app/utils/useCookies';
 import { GiHamburgerMenu } from "react-icons/gi";
 import Link from "next/link";
+import { fetchUser, setUsername } from '@/store/userSlice';
+import { AppDispatch } from '@/store/store';
 import { HiCube } from "react-icons/hi2";
-import { IoPersonCircle, IoLogOut } from "react-icons/io5";
-import { BiSolidSpreadsheet } from "react-icons/bi";
-import { AiFillProject } from "react-icons/ai";
-import { RiCalendarScheduleFill } from "react-icons/ri";
+import { User } from '@/types/userTypes';
+import { VscGraph, VscAccount, VscTable, VscProject, VscCalendar, VscSignOut } from "react-icons/vsc";
 
 interface LayoutProps {
   children: ReactNode;
@@ -28,8 +29,30 @@ const SidebarLayout: React.FC<LayoutProps> = ({ children }) => {
   const username = useSelector((state: RootState) => state.user.username);
   const avatarUrl = useSelector((state: RootState) => state.user.avatarUrl);
   const router = useRouter();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const avatarRef = useRef<HTMLDivElement>(null);
+  
+  // Local state to manage user data, loading, and error states
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        setLoading(true);
+        const fetchedUser = await dispatch(fetchUser()).unwrap();
+        setUser(fetchedUser);
+        dispatch(setUsername(fetchedUser.username));
+      } catch (err) {
+        setError(err as string || 'Failed to fetch user data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUserData();
+  }, [dispatch]);
 
   // Control loading based on username availability
   useEffect(() => {
@@ -104,29 +127,36 @@ const SidebarLayout: React.FC<LayoutProps> = ({ children }) => {
         </div>
 
         <nav className="flex flex-col space-y-2 p-4">
-          <Link href="/profile" className="flex items-center text-lg">
-            <IoPersonCircle size={36} className={`mr-2 ${isMinimized ? "mr-0" : ""}`} />
-            <span className={`${isMinimized ? "hidden" : ""}`}>Profile</span>
+          <Link href="/dashboard" className="flex items-center text-lg">
+            <VscGraph size={28} className={`mr-2 ${isMinimized ? "mr-0" : ""}`} />
+            <span className={`${isMinimized ? "hidden" : ""}`}>Dashboard</span>
+          </Link>
+        </nav>
+
+        <nav className="flex flex-col space-y-2 p-4">
+          <Link href="/account" className="flex items-center text-lg">
+            <VscAccount size={28} className={`mr-2 ${isMinimized ? "mr-0" : ""}`} />
+            <span className={`${isMinimized ? "hidden" : ""}`}>Account</span>
           </Link>
         </nav>
 
         <nav className="flex flex-col space-y-2 p-4">
           <Link href="/daily-time-record" className="flex items-center text-lg">
-            <BiSolidSpreadsheet size={36} className={`mr-2 ${isMinimized ? "mr-0" : ""}`} />
+            <VscTable size={28} className={`mr-2 ${isMinimized ? "mr-0" : ""}`} />
             <span className={`${isMinimized ? "hidden" : ""}`}>Daily Time Record</span>
           </Link>
         </nav>
 
         <nav className="flex flex-col space-y-2 p-4">
           <Link href="/projects" className="flex items-center text-lg">
-            <AiFillProject size={36} className={`mr-2 ${isMinimized ? "mr-0" : ""}`} />
+            <VscProject size={28} className={`mr-2 ${isMinimized ? "mr-0" : ""}`} />
             <span className={`${isMinimized ? "hidden" : ""}`}>Projects</span>
           </Link>
         </nav>
 
         <nav className="flex flex-col space-y-2 p-4">
           <Link href="/leave-requests" className="flex items-center text-lg">
-            <RiCalendarScheduleFill size={36} className={`mr-2 ${isMinimized ? "mr-0" : ""}`} />
+            <VscCalendar size={28} className={`mr-2 ${isMinimized ? "mr-0" : ""}`} />
             <span className={`${isMinimized ? "hidden" : ""}`}>Leave Requests</span>
           </Link>
         </nav>
@@ -150,29 +180,34 @@ const SidebarLayout: React.FC<LayoutProps> = ({ children }) => {
             </div>
             
             <nav className="flex flex-col space-y-8 mt-4 p-4">
-              <Link href="/profile" className="flex items-center text-lg">
-                <IoPersonCircle size={36} className="mr-2" />
-                <span>Profile</span>
+              <Link href="/dashboard" className="flex items-center text-lg">
+                <VscGraph size={36} className="mr-2" />
+                <span>Dashboard</span>
+              </Link>
+
+              <Link href="/account" className="flex items-center text-lg">
+                <VscAccount size={36} className="mr-2" />
+                <span>Account</span>
               </Link>
 
               <Link href="/daily-time-record" className="flex items-center text-lg">
-                <BiSolidSpreadsheet size={36} className="mr-2" />
+                <VscTable size={36} className="mr-2" />
                 <span>Daily Time Record</span>
               </Link>
 
               <Link href="/projects" className="flex items-center text-lg">
-                <AiFillProject size={36} className="mr-2" />
+                <VscProject size={36} className="mr-2" />
                 <span>Projects</span>
               </Link>
 
               <Link href="/leave-requests" className="flex items-center text-lg">
-                <RiCalendarScheduleFill size={36} className="mr-2" />
+                <VscCalendar size={36} className="mr-2" />
                 <span>Leave Requests</span>
               </Link>
             </nav>
             <div className="p-4 border-t mt-auto">
               <Link href="#" onClick={handleLogout} className="flex items-center text-lg">
-                <IoLogOut size={36} className="mr-2" />
+                <VscSignOut size={36} className="mr-2" />
                 <span>Logout</span>
               </Link>
             </div>

@@ -13,7 +13,7 @@ import ContactInformationForm from '@/components/profile/ContactInformationForm'
 import ApiKeyForm from '@/components/profile/ApiKeyForm';
 import ChangePasswordForm from '@/components/profile/ChangePasswordForm';
 
-const ProfilePage: React.FC = () => {
+const AccountPage: React.FC = () => {
   useAuthCheck(['employee', 'intern', 'company_admin']);
   const dispatch = useDispatch<AppDispatch>();
 
@@ -58,4 +58,4 @@ const ProfilePage: React.FC = () => {
   );
 };
 
-export default ProfilePage;
+export default AccountPage;
