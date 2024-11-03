@@ -9,7 +9,9 @@ const DashboardPage: React.FC = () => {
 
   return (
     <SidebarLayout>
-      <div>Dashboard</div>
+      <div className="text-4xl font-bold mb-8">
+        <h1>Dashboard</h1>
+      </div>
     </SidebarLayout>
   );
 };

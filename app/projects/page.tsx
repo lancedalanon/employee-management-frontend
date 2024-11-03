@@ -9,7 +9,9 @@ const ProfilePage: React.FC = () => {
 
   return (
     <SidebarLayout>
-      <div>Projects</div>
+      <div className="text-4xl font-bold mb-8">
+        <h1>Projects</h1>
+      </div>
     </SidebarLayout>
   );
 };

@@ -213,6 +213,9 @@ const DtrPage: React.FC = () => {
   return (
     <>
       <SidebarLayout>
+        <div className="text-4xl font-bold mb-8">
+          <h1>Daily Time Record</h1>
+        </div>
         <div className="w-full p-4 shadow-lg rounded-lg bg-surface border mb-8">
           <div className="flex flex-wrap justify-between items-center">
             <h2><span className="font-bold">Current Time:</span> {currentTime}</h2>

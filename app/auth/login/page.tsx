@@ -57,7 +57,7 @@ const Login: React.FC = () => {
       CookieUtils.setCookie('userData', JSON.stringify(userData), { path: '/', secure: true, sameSite: 'Strict' });
 
       // Redirect to protected page after successful login
-      router.push('/profile');
+      router.push('/dashboard');
     } else {
       console.log('Login failed:', result.payload);
     }

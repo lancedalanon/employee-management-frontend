@@ -17,7 +17,7 @@ const useAlreadyAuthRedirect = () => {
 
         // Redirect to the profile page if the user has the required roles
         if (parsedUserData) {
-          router.push('/profile');
+          router.push('/dashboard');
         }
       } catch (error) {
         console.error('Error parsing user data:', error);
