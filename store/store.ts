@@ -5,6 +5,7 @@ import registrationReducer from './registrationSlice';
 import dtrReducer from './dtrSlice';
 import leaveRequestReducer from './leaveRequestSlice';
 import projectReducer from './projectSlice';
+import projectTaskReducer from './projectTaskSlice';
 
 const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ const store = configureStore({
     dtr: dtrReducer,    
     leaveRequest: leaveRequestReducer,
     project: projectReducer,
+    projectTask: projectTaskReducer,
   },
 });
 

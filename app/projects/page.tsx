@@ -6,13 +6,13 @@ import { fetchProjects } from "@/store/projectSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { Project } from "@/types/projectTypes";
-import Link from "next/link"; // Import Link from Next.js
+import Link from "next/link"; // Importing Link for navigation
 
-// Project card component for displaying individual projects
+// Project card component to display individual project details
 const ProjectCard: React.FC<{ project: Project }> = ({ project }) => (
   <div className="border rounded-lg p-4 shadow hover:shadow-md transition-shadow bg-white">
     <h3 className="text-xl font-semibold text-blue-600 hover:text-blue-800 transition-colors">
-      {/* Wrap the title in a Link to make it clickable */}
+      {/* Wrap project title in a Link to make it clickable */}
       <Link href={`/projects/${project.project_id}`}>
         {project.project_name}
       </Link>
@@ -27,51 +27,51 @@ const ProjectCard: React.FC<{ project: Project }> = ({ project }) => (
 );
 
 const ProjectPage: React.FC = () => {
+  // Auth check for allowed roles
   useAuthCheck(["employee", "intern", "company_admin"]);
 
   const dispatch = useDispatch<AppDispatch>();
   const { loading, error } = useSelector((state: RootState) => state.project);
 
-  // State for managing projects, pagination, and comparison flag
+  // State management for projects, pagination, and filters
   const [projects, setProjects] = useState<Project[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
   const [sort, setSort] = useState<string>("project_id");
   const [order, setOrder] = useState<string>("desc");
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [hasMore, setHasMore] = useState<boolean>(true);
 
-  const [hasMore, setHasMore] = useState<boolean>(true); // State to track if there are more projects to load
-
-  // Fetch data function
+  // Function to fetch projects based on parameters
   const fetchData = async (params: Record<string, unknown>) => {
     try {
       const response = await dispatch(fetchProjects(params)).unwrap();
+
       if (response && Array.isArray(response.data)) {
-        // Compare current projects with the new data
         const newProjects = response.data;
 
-        // Check if the new data has any project already in the current list
+        // Check if any of the newly fetched projects already exist in the current list
         const isSameAsCurrent = newProjects.every((newProject) =>
           projects.some((currentProject) => currentProject.project_id === newProject.project_id)
         );
 
+        // If no new projects, set hasMore to false
         if (isSameAsCurrent) {
-          setHasMore(false); // No more projects to load
+          setHasMore(false);
         } else {
-          setProjects([...projects, ...newProjects]);
+          setProjects((prevProjects) => [...prevProjects, ...newProjects]);
         }
       } else {
-        setProjects([]); // In case the response is not in the expected format
+        setProjects([]); // If the response isn't in the expected format, reset projects
       }
-      return response;
     } catch (error) {
       console.error("Failed to fetch projects:", error);
-      setProjects([]); // Fallback to empty array on error
+      setProjects([]); // Reset to an empty list in case of error
       throw error;
     }
   };
 
-  // UseEffect to load projects on mount and whenever parameters change
+  // Load projects when parameters change
   useEffect(() => {
     const loadData = async () => {
       await fetchData({
@@ -85,7 +85,7 @@ const ProjectPage: React.FC = () => {
     loadData();
   }, [currentPage, itemsPerPage, sort, order, searchTerm]);
 
-  // Load next set of projects
+  // Handler to load next page of projects
   const handleNextPage = () => {
     if (hasMore && !loading) {
       setCurrentPage((prev) => prev + 1);
@@ -96,7 +96,7 @@ const ProjectPage: React.FC = () => {
     <SidebarLayout>
       <h1 className="text-4xl font-semibold text-gray-800 mb-8">Projects</h1>
 
-      {/* Loading, Empty, and Error States */}
+      {/* Loading, Error, and Empty States */}
       <div className="text-center">
         {loading && <p className="text-gray-600">Loading projects...</p>}
         {error && <p className="text-red-500">Error: {error}</p>}
@@ -117,7 +117,7 @@ const ProjectPage: React.FC = () => {
         <button
           onClick={handleNextPage}
           className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-          disabled={loading || !hasMore} // Disable the button while loading or when there are no more projects
+          disabled={loading || !hasMore} // Disable button during loading or when there are no more projects
         >
           {loading ? "Loading more..." : "Load More"}
         </button>
