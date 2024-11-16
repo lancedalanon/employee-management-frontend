@@ -12,7 +12,7 @@ const SelectRegistrationType: React.FC = () => {
         </h2>
 
         {/* Two Column Layout with Divider */}
-        <div className="grid grid-cols-2 gap-8 mb-4 relative">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-4 relative">
           
           {/* Employee Section */}
           <div className="text-center">
@@ -36,7 +36,8 @@ const SelectRegistrationType: React.FC = () => {
           </div>
 
           {/* Divider */}
-          <div className="absolute left-1/2 h-full w-px bg-gray-300"></div>
+          <div className="absolute md:left-1/2 md:h-full bg-gray-300"></div>
+          <div className="md:hidden text-center text-2xl">Or</div>
 
           {/* Company Admin Section */}
           <div className="text-center">

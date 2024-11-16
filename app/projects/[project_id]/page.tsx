@@ -29,7 +29,6 @@ const ProjectPage: React.FC = () => {
   const [order, setOrder] = useState<string>("desc");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [hasChanges, setHasChanges] = useState<boolean>(false);
-  const [hasMore, setHasMore] = useState<boolean>(true);
 
   // Fetch tasks based on the current pagination and sorting parameters
   const fetchData = async (params: Record<string, unknown>) => {
@@ -47,9 +46,7 @@ const ProjectPage: React.FC = () => {
         // Update task list and manage pagination state
         if (!isSameAsCurrent) {
           setTasks([...tasks, ...newTasks]);
-          setHasMore(newTasks.length > 0);
         } else {
-          setHasMore(false);
         }
       } else {
         setTasks([]);
@@ -134,7 +131,7 @@ const ProjectPage: React.FC = () => {
 
   return (
     <SidebarLayout>
-      <h1 className="text-4xl font-semibold text-gray-800 mb-8">Projects</h1>
+      <h1 className="text-4xl font-semibold text-gray-800 mb-8">Tasks</h1>
 
       <div className="flex flex-col justify-between h-full">
         {hasChanges && (

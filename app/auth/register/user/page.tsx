@@ -6,6 +6,12 @@ import * as yup from 'yup';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { IoIosArrowRoundBack } from "react-icons/io";
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '@/store/store';
+import { registerUser } from "@/store/registrationSlice";
+import useAlreadyAuthRedirect from '@/app/hooks/useAlreadyAuthRedirect';
+import CookieUtils from '@/app/utils/useCookies';
+import { useRouter } from 'next/navigation';
 
 // Step-specific interfaces for the registration form
 interface PersonalInfo {
@@ -105,9 +111,14 @@ const accountInfoSchema: yup.ObjectSchema<AccountInfo> = yup.object().shape({
 
 const Registration: React.FC = () => {
   const searchParams = useSearchParams();
-  const token = searchParams.get('token'); // Extract token from the query parameters
+  const dispatch = useDispatch<AppDispatch>();
+  const router = useRouter();
   const [step, setStep] = useState(1); // State to track the current step of the form
+  const [loading, setLoading] = useState(false);
 
+  // Call the hook to check if user is already logged in
+  useAlreadyAuthRedirect();
+  
   // Get validation schema based on the current step
   const getValidationSchema = (step: number): yup.ObjectSchema<RegistrationFormData> => {
     switch (step) {
@@ -143,10 +154,33 @@ const Registration: React.FC = () => {
 
   // Submit handler for the form
   const onSubmit: SubmitHandler<RegistrationFormData> = async (data) => {
+    setLoading(true); // Set loading to true when form is being submitted
+
+    // Extract the token from the query parameters
+    const token = searchParams.get('token');
+    
+    // Add the token to the data object
     const submissionData = { ...data, token };
 
-    // Perform final form submission logic here
-    console.log('Form data:', submissionData);
+    try {
+      // Dispatch registerUser action with form data and unwrap the result
+      const result = await dispatch(registerUser(submissionData)).unwrap();
+
+      // If successful, extract payload data
+      const { user_id, token, roles } = result.data;
+
+      // Save user data in cookies
+      const userData = { user_id, token, roles };
+      CookieUtils.setCookie('userData', JSON.stringify(userData), { path: '/', secure: true, sameSite: 'Strict' });
+
+      // Redirect to profile page
+      router.push('/profile');
+    } catch (error) {
+      // Handle error if registration fails
+      console.error('Registration failed:', error);
+    } finally {
+      setLoading(false); // Set loading to false after registration finishes
+    }
   };
 
   return (
@@ -384,7 +418,10 @@ const Registration: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleBack}
-                  className="w-full px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:ring-4 focus:ring-gray-200 mr-2"
+                  className={`w-full px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:ring-4 focus:ring-gray-200 mr-2 ${
+                    loading ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                  disabled={loading} // Disable the button during form submission
                 >
                   Back
                 </button>
@@ -463,7 +500,10 @@ const Registration: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleBack}
-                  className="w-full px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:ring-4 focus:ring-gray-200 mr-2"
+                  className={`w-full px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:ring-4 focus:ring-gray-200 mr-2 ${
+                    loading ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                  disabled={loading} // Disable the button during form submission
                 >
                   Back
                 </button>
@@ -471,9 +511,12 @@ const Registration: React.FC = () => {
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  className="w-full px-4 py-2 text-white bg-indigo-500 rounded-md hover:bg-indigo-600 focus:ring-4 focus:ring-indigo-200"
+                  className={`w-full px-4 py-2 text-white bg-indigo-500 rounded-md hover:bg-indigo-600 focus:ring-4 focus:ring-indigo-200 ${
+                    loading ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                  disabled={loading} // Disable the button during form submission
                 >
-                  Submit
+                  {loading ? 'Submitting...' : 'Submit'} {/* Show "Submitting..." while loading */}
                 </button>
               </div>
             </>

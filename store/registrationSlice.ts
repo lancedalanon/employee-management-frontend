@@ -49,7 +49,6 @@ export const registerCompanyAdmin = createAsyncThunk<
     async (adminData, { rejectWithValue }) => {
         try {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_LARAVEL_API_BASE_URL}/v1/register/company-admin`, adminData);
-            console.log(response);
             return response.data;
         } catch (error) {
             if (error instanceof AxiosError && error.response) {
