@@ -64,7 +64,7 @@ const SelectRegistrationType: React.FC = () => {
         {/* Sign-in instead link */}
         <div className="flex justify-center items-center w-full text-indigo-500 mt-8 text-lg">
             <Link 
-             href="/auth/login"
+             href="/"
             >
              Already have an account?
             </Link>

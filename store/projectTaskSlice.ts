@@ -2,7 +2,6 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '@/axios';
 import { AxiosError } from 'axios';
 import { ProjectTask, PaginatedProjectTaskResponse } from '@/types/projectTaskTypes';
-import internal from 'stream';
 
 // Define the initial state for the ProjectTask slice
 interface ProjectTaskState {
@@ -40,12 +39,11 @@ export const fetchProjectTasks = createAsyncThunk<PaginatedProjectTaskResponse, 
     }
 );
 
-// Async thunk to create a task for a project
-export const createProjectTask = createAsyncThunk<ProjectTask, { projectId: number, taskData: ProjectTask }>(
+export const createProjectTask = createAsyncThunk<ProjectTask, { projectId: number, data: Record<string, unknown> }>(
     'projectTask/createProjectTask',
-    async ({ projectId, taskData }, { rejectWithValue }) => {
+    async ({ projectId, data }, { rejectWithValue }) => { 
         try {
-            const response = await axiosInstance.post(`/v1/projects/${projectId}/tasks`, taskData);
+            const response = await axiosInstance.post(`/v1/projects/${projectId}/tasks?project_id=${projectId}`, data);
             return response.data as ProjectTask;
         } catch (error) {
             return rejectWithValue(handleError(error as AxiosError));

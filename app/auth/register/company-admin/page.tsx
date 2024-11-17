@@ -387,7 +387,7 @@ const CompanyAdminRegistration: React.FC = () => {
               {/* Sign-in instead link */}
               <div className="flex justify-end w-full text-indigo-500 mb-4">
                 <Link 
-                  href="/auth/login"
+                  href="/"
                 >
                   Already have an account?
                 </Link>

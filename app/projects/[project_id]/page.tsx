@@ -2,16 +2,24 @@
 import React, { useState, useEffect } from "react";
 import SidebarLayout from "@/components/SidebarLayout";
 import useAuthCheck from "@/app/hooks/useAuthCheck";
+import { useParams } from "next/navigation";
+import { IoIosArrowRoundBack } from "react-icons/io";
+import Link from "next/link";
 import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/store/store";
-import { fetchProjectTasks } from "@/store/projectTaskSlice";
+import { fetchProjectTasks, createProjectTask } from "@/store/projectTaskSlice";
 import {
   ProjectTask,
-  ProjectTaskProgress,
   ProjectTaskPriorityLevel,
+  ProjectTaskProgress,
   PaginatedProjectTaskResponse,
 } from "@/types/projectTaskTypes";
-import { useParams } from "next/navigation"; // Import useParams from next/navigation
+import { AppDispatch } from "@/store/store";
+import Button from "@/components/Button";
+import { useForm, Controller } from "react-hook-form";
+import Dialog from "@/components/Dialog";
+import InputField from "@/components/InputField";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 const ProjectPage: React.FC = () => {
   // Use useParams to get the project_id from the URL
@@ -36,7 +44,6 @@ const ProjectPage: React.FC = () => {
       const response = await dispatch(fetchProjectTasks({ params })).unwrap() as PaginatedProjectTaskResponse;
       if (response?.data) {
         const newTasks = response.data;
-        console.log(newTasks);
 
         // Check if fetched tasks are already in the current state
         const isSameAsCurrent = newTasks.every((newTask) =>
@@ -129,52 +136,258 @@ const ProjectPage: React.FC = () => {
     alert("Tasks have been reset to the latest fetched data!");
   };
 
+  // Header Component
+  const Header: React.FC = () => (
+    <div className="mb-8">
+      <Link href="/projects" className="flex items-center hover:underline">
+        <IoIosArrowRoundBack size={32} />
+        <span className="text-xl">Back to Projects page</span>
+      </Link>
+    </div>
+  );
+
+  // Form validation schema using Yup
+  const validationSchema = yup.object({
+    project_task_name: yup.string().required("Task name is required").max(255, "Maximum length is 255 characters"),
+    project_task_description: yup.string().required("Task description is required").max(500, "Maximum length is 500 characters"),
+    project_task_progress: yup.string().oneOf(["Not started", "In progress", "Completed"], "Invalid progress option"),
+    project_task_priority_level: yup.string().oneOf(["Low", "Medium", "High"], "Invalid priority level"),
+  });
+
+  interface TaskFormValues {
+    project_task_name: string;
+    project_task_description: string;
+    project_task_progress: string;
+    project_task_priority_level: string;
+  }
+
+  const AddTaskButton: React.FC = () => {
+    const dispatch = useDispatch();
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false); // Loading state for API call
+  
+    // React Hook Form setup
+    const { handleSubmit, control, reset, formState: { errors } } = useForm<TaskFormValues>({
+      defaultValues: {
+        project_task_name: "",
+        project_task_description: "",
+        project_task_progress: "Not started",
+        project_task_priority_level: "Medium",
+      },
+      resolver: yupResolver(validationSchema),
+    });
+  
+    // Handle form submission
+    const onSubmit = async (data: TaskFormValues) => {
+      setIsLoading(true); // Show loading spinner while API request is in progress
+  
+      try {
+        await dispatch(createProjectTask({ projectId: project_id, data }));
+        setIsDialogOpen(false);
+        setTasks([]);
+        await fetchData({
+          projectId: project_id,
+          page: currentPage,
+          perPage: itemsPerPage,
+          sort,
+          order,
+          search: searchTerm,
+        });
+        console.log(tasks);
+        reset(); // Reset form after submission
+      } catch (error) {
+        // Handle error case (you can set some error state or show a notification)
+        console.error("Error creating task:", error);
+      } finally {
+        setIsLoading(false); // Stop loading spinner
+      }
+    };
+  
+    return (
+      <>
+        <Button
+          type="button"
+          label="Add Task"
+          onClick={() => setIsDialogOpen(true)}
+          size="lg"
+          variant="primary"
+          className="mb-8"
+        />
+  
+        <Dialog
+          isOpen={isDialogOpen}
+          onClose={() => setIsDialogOpen(false)}
+          title="Add New Task"
+          className="w-1/2"
+          showCloseButton
+        >
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* Task Name Field */}
+            <Controller
+              name="project_task_name"
+              control={control}
+              render={({ field }) => (
+                <InputField
+                  label="Task Name"
+                  id="project_task_name"
+                  placeholder="Enter task name"
+                  {...field}
+                  error={errors.project_task_name?.message}
+                />
+              )}
+            />
+  
+            {/* Task Description Field */}
+            <Controller
+              name="project_task_description"
+              control={control}
+              render={({ field }) => (
+                <InputField
+                  label="Task Description"
+                  id="project_task_description"
+                  placeholder="Enter task description"
+                  {...field}
+                  error={errors.project_task_description?.message}
+                />
+              )}
+            />
+  
+            {/* Task Progress Dropdown */}
+            <div>
+              <label htmlFor="project_task_progress">
+                Task Progress
+              </label>
+              <Controller
+                name="project_task_progress"
+                control={control}
+                render={({ field }) => (
+                  <select
+                    {...field}
+                    id="project_task_progress"
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="Not started">Not started</option>
+                    <option value="In progress">In progress</option>
+                    <option value="Reviewing">Reviewing</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Backlog">Backlog</option>
+                  </select>
+                )}
+              />
+              <p className="text-red-500 text-sm mt-1">{errors.project_task_progress?.message}</p>
+            </div>
+  
+            {/* Task Priority Level Dropdown */}
+            <div>
+              <label htmlFor="project_task_priority_level">
+                Priority Level
+              </label>
+              <Controller
+                name="project_task_priority_level"
+                control={control}
+                render={({ field }) => (
+                  <select
+                    {...field}
+                    id="project_task_priority_level"
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                  </select>
+                )}
+              />
+              <p className="text-red-500 text-sm mt-1">{errors.project_task_priority_level?.message}</p>
+            </div>
+  
+            {/* Action Buttons */}
+            <div className="flex justify-end space-x-4">
+              <Button
+                type="button"
+                label="Cancel"
+                onClick={() => setIsDialogOpen(false)}
+                variant="secondary"
+              />
+              <Button
+                type="submit"
+                label={isLoading ? "Creating..." : "Create Task"}
+                variant="primary"
+                disabled={isLoading}
+              />
+            </div>
+          </form>
+        </Dialog>
+      </>
+    );
+  };
+
+  // Task Column Component
+  const TaskColumn: React.FC<{ progress: ProjectTaskProgress }> = ({
+    progress,
+  }) => {
+    const columnTasks = tasks.filter(
+      (task) => task.project_task_progress === progress
+    );
+
+    return (
+      <div
+        className="bg-gray-200 p-6 rounded-xl flex flex-col min-h-[350px] overflow-hidden"
+        onDragOver={handleDragOver}
+        onDrop={(e) => handleDrop(e, progress)}
+      >
+        <h2 className="text-xl font-semibold text-gray-700 mb-6">{progress}</h2>
+        <div className="tasks-container flex-1 overflow-y-auto min-h-[250px]">
+          {columnTasks.map((task) => (
+            <div
+              key={task.project_task_id}
+              className={`task-item bg-white text-gray-800 p-4 rounded-lg mb-4 cursor-pointer border-l-8 ${getBorderColor(
+                task.project_task_priority_level
+              )}`}
+              draggable
+              onDragStart={(e) => handleDragStart(e, task.project_task_id)}
+            >
+              {task.project_task_name}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  // Kanban Board with Save/Reset
+  const KanbanBoard: React.FC = () => (
+    <div className="bg-gray-100 p-6 rounded-lg">
+      {hasChanges && (
+        <div className="flex justify-end mb-4 gap-4">
+          <button
+            onClick={resetTasks}
+            className="bg-gray-600 text-white px-8 py-2 rounded-lg text-lg font-semibold hover:bg-gray-700"
+          >
+            Reset
+          </button>
+          <button
+            onClick={saveTasks}
+            className="bg-blue-600 text-white px-8 py-2 rounded-lg text-lg font-semibold hover:bg-blue-700"
+          >
+            Save
+          </button>
+        </div>
+      )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        {Object.values(ProjectTaskProgress).map((progress) => (
+          <TaskColumn key={progress} progress={progress} />
+        ))}
+      </div>
+    </div>
+  );
+
   return (
     <SidebarLayout>
-      <h1 className="text-4xl font-semibold text-gray-800 mb-8">Tasks</h1>
-
-      <div className="flex flex-col justify-between h-full">
-        {hasChanges && (
-          <div className="flex justify-between mb-6 px-8 py-4 bg-gray-50 rounded-md shadow-md">
-            <button onClick={resetTasks} className="bg-gray-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-gray-700 transition-all">
-              Reset
-            </button>
-            <button onClick={saveTasks} className="bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-all">
-              Save
-            </button>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 px-6 py-8 flex-grow bg-gray-100 rounded-md">
-          {Object.values(ProjectTaskProgress).map((progress) => {
-            const columnTasks = tasks.filter((task) => task.project_task_progress === progress);
-
-            return (
-              <div key={progress} className="bg-gray-200 p-6 rounded-xl flex flex-col min-h-[350px] overflow-hidden" onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, progress)}>
-                <h2 className="text-xl font-semibold text-gray-700 mb-6">{progress}</h2>
-                <div className="tasks-container flex-1 overflow-y-auto min-h-[250px]">
-                  {columnTasks.map((task) => (
-                    <div key={task.project_task_id} className={`task-item bg-white text-gray-800 p-4 rounded-lg mb-4 cursor-pointer border-l-8 ${getBorderColor(task.project_task_priority_level)}`} draggable onDragStart={(e) => handleDragStart(e, task.project_task_id)}>
-                      {task.project_task_name}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {hasChanges && (
-          <div className="flex justify-between mt-6 px-8 py-4 bg-gray-50 rounded-md shadow-md">
-            <button onClick={resetTasks} className="bg-gray-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-gray-700 transition-all">
-              Reset
-            </button>
-            <button onClick={saveTasks} className="bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-all">
-              Save
-            </button>
-          </div>
-        )}
+      <div className="flex justify-between">
+        <Header />
+        <AddTaskButton />
       </div>
+      <KanbanBoard />
     </SidebarLayout>
   );
 };
