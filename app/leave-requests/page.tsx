@@ -17,7 +17,7 @@ import TextAreaField from '@/components/TextAreaField';
 
 // Form data interface
 interface LeaveRequestFormData {
-  dtr_absence_date: string;
+  dtr_absence_date: Date;
   dtr_absence_reason: string;
   refreshData: () => Promise<void>;
 }
@@ -116,7 +116,7 @@ const LeaveRequestPage: React.FC = () => {
   useAuthCheck(['employee', 'intern', 'company_admin']);
   const dispatch = useDispatch<AppDispatch>();
 
-  const [data, setData] = useState<PaginatedLeaveRequestResponse[]>([]);
+  const [data, setData] = useState<LeaveRequest[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
   const [sort, setSort] = useState<string>('dtr_id');
@@ -146,6 +146,11 @@ const LeaveRequestPage: React.FC = () => {
     };
     loadData();
   }, [currentPage, itemsPerPage, sort, order, searchTerm]);
+
+  // Define a wrapper function to match the expected signature
+  const wrapperFetchData = async (): Promise<void> => {
+    await fetchData({}); // Call fetchData with an empty object or with the appropriate parameters
+  };
 
   return (<>
     <SidebarLayout>
@@ -191,7 +196,7 @@ const LeaveRequestPage: React.FC = () => {
     <LeaveRequestFormDialog
       isDialogOpen={showLeaveRequestForm}
       closeDialog={closeDialog}
-      refreshData={fetchData}
+      refreshData={wrapperFetchData}
     />
   </>);
 };

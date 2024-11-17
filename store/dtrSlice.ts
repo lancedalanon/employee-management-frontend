@@ -16,12 +16,6 @@ const initialState: DtrState = {
     error: null,
 };
 
-interface DtrFormData {
-    dtr_time_in_image?: Blob;
-    dtr_time_out_image?: Blob;
-    end_of_the_day_images?: File[];
-}
-
 // Create async thunk to fetch DTR data
 export const fetchDtrs = createAsyncThunk<PaginatedDtrResponse, Record<string, unknown>>(
     'dtr/fetchDtrs',
@@ -45,7 +39,7 @@ export const fetchDtrs = createAsyncThunk<PaginatedDtrResponse, Record<string, u
 );
 
 // Async thunk to store DTR time-in
-export const storeTimeIn = createAsyncThunk<PaginatedDtrResponse, DtrFormData>(
+export const storeTimeIn = createAsyncThunk<PaginatedDtrResponse, FormData>(
     'dtr/storeTimeIn',
     async (formData, { rejectWithValue }) => {
         try {
@@ -66,7 +60,7 @@ export const storeTimeIn = createAsyncThunk<PaginatedDtrResponse, DtrFormData>(
 );
 
 // Async thunk to store DTR time-out
-export const storeTimeOut = createAsyncThunk<PaginatedDtrResponse, DtrFormData>(
+export const storeTimeOut = createAsyncThunk<PaginatedDtrResponse, FormData>(
     'dtr/storeTimeOut',
     async (formData, { rejectWithValue }) => {
         try {

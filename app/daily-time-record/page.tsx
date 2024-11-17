@@ -32,7 +32,14 @@ const useCurrentTime = () => {
   return currentTime;
 };
 
-const CameraDialog = ({ isDialogOpen, closeDialog, currentAction, onCapture }) => {
+interface CameraDialogProps {
+  isDialogOpen: boolean;
+  closeDialog: () => void;
+  currentAction: string | null;
+  onCapture: (blob: Blob, textareaValue: string, uploadedImages: File[]) => void;
+}
+
+const CameraDialog: React.FC<CameraDialogProps> = ({ isDialogOpen, closeDialog, currentAction, onCapture }) => {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [textareaValue, setTextareaValue] = useState<string>(''); // State for textarea
   const [uploadedImages, setUploadedImages] = useState<File[]>([]); // State for uploaded images
@@ -130,7 +137,7 @@ const DtrPage: React.FC = () => {
   const currentTime = useCurrentTime();
 
   // Pagination variables
-  const [data, setData] = useState<PaginatedDtrResponse[]>([]);
+  const [data, setData] = useState<Dtr[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
   const [sort, setSort] = useState<string>('dtr_id');

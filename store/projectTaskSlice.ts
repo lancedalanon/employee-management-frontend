@@ -16,10 +16,16 @@ const initialState: ProjectTaskState = {
     error: null,
 };
 
-// Helper function to handle axios errors
+interface ErrorResponse {
+    message: string;
+    [key: string]: string;
+}
+
 const handleError = (error: AxiosError): string => {
     if (error.response) {
-        return error.response.data.message || error.response.data || 'Failed to process request';
+        // Type casting to the defined ErrorResponse interface
+        const data = error.response.data as ErrorResponse;
+        return data.message || JSON.stringify(data) || 'Failed to process request';
     }
     return 'An unexpected error occurred';
 };
@@ -134,8 +140,6 @@ const projectTaskSlice = createSlice({
             })
             .addCase(deleteProjectTask.fulfilled, (state) => {
                 state.loading = false;
-                // Remove task from the list after deletion
-                state.tasks = state.tasks.filter((task) => task.project_task_id !== action.meta.arg.taskId);
             })
             .addCase(deleteProjectTask.rejected, (state, action) => {
                 state.loading = false;
