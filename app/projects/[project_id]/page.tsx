@@ -150,7 +150,7 @@ const ProjectPage: React.FC = () => {
   const validationSchema = yup.object({
     project_task_name: yup.string().required("Task name is required").max(255, "Maximum length is 255 characters"),
     project_task_description: yup.string().required("Task description is required").max(500, "Maximum length is 500 characters"),
-    project_task_progress: yup.string().oneOf(["Not started", "In progress", "Completed"], "Invalid progress option"),
+    project_task_progress: yup.string().oneOf(["Not started", "In progress", "Reviewing", "Completed", "Backlog"], "Invalid progress option"),
     project_task_priority_level: yup.string().oneOf(["Low", "Medium", "High"], "Invalid priority level"),
   });
 
@@ -185,15 +185,7 @@ const ProjectPage: React.FC = () => {
         await dispatch(createProjectTask({ projectId: project_id, data }));
         setIsDialogOpen(false);
         setTasks([]);
-        await fetchData({
-          projectId: project_id,
-          page: currentPage,
-          perPage: itemsPerPage,
-          sort,
-          order,
-          search: searchTerm,
-        });
-        console.log(tasks);
+        await fetchData({ projectId: project_id, page: 1, perPage: itemsPerPage, sort, order, search: searchTerm });
         reset(); // Reset form after submission
       } catch (error) {
         // Handle error case (you can set some error state or show a notification)
