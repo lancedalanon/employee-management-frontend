@@ -2,7 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 
 interface AvatarProps {
-  src?: string; // URL of the avatar image
+  src?: string | null; // URL of the avatar image
   alt?: string; // Alternative text for the image
   size?: number; // Size of the avatar in pixels
 }

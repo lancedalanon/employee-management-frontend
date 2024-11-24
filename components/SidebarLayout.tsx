@@ -14,7 +14,6 @@ import Link from "next/link";
 import { fetchUser, setUsername } from '@/store/userSlice';
 import { AppDispatch } from '@/store/store';
 import { HiCube } from "react-icons/hi2";
-import { User } from '@/types/userTypes';
 import { VscGraph, VscAccount, VscTable, VscProject, VscCalendar, VscSignOut } from "react-icons/vsc";
 
 interface LayoutProps {
@@ -31,23 +30,15 @@ const SidebarLayout: React.FC<LayoutProps> = ({ children }) => {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const avatarRef = useRef<HTMLDivElement>(null);
-  
-  // Local state to manage user data, loading, and error states
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+
 
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        setLoading(true);
         const fetchedUser = await dispatch(fetchUser()).unwrap();
-        setUser(fetchedUser);
         dispatch(setUsername(fetchedUser.username));
-      } catch (err) {
-        setError(err as string || 'Failed to fetch user data');
-      } finally {
-        setLoading(false);
+      } catch {
+        console.log('Failed to fetch user data');
       }
     };
 

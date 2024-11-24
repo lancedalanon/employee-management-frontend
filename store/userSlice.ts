@@ -10,6 +10,7 @@ interface UserState {
     username: string | null;
     loading: boolean;
     error: string | null;
+    avatarUrl: string | null;
 }
 
 const initialState: UserState = {
@@ -17,6 +18,7 @@ const initialState: UserState = {
     username: null,
     loading: false,
     error: null,
+    avatarUrl: null,
 };
 
 type PersonalInformationFormValues = {
