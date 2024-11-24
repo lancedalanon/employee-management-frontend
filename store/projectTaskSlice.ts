@@ -21,6 +21,13 @@ interface ErrorResponse {
     [key: string]: string;
 }
 
+interface TaskFormValues {
+    project_task_name: string;
+    project_task_description: string;
+    project_task_progress?: string;
+    project_task_priority_level?: string;
+  }
+
 const handleError = (error: AxiosError): string => {
     if (error.response) {
         // Type casting to the defined ErrorResponse interface
@@ -45,7 +52,7 @@ export const fetchProjectTasks = createAsyncThunk<PaginatedProjectTaskResponse, 
     }
 );
 
-export const createProjectTask = createAsyncThunk<ProjectTask, { projectId: number, data: Record<string, unknown> }>(
+export const createProjectTask = createAsyncThunk<ProjectTask, { projectId: number, data: TaskFormValues }>(
     'projectTask/createProjectTask',
     async ({ projectId, data }, { rejectWithValue }) => { 
         try {

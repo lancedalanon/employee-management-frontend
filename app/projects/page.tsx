@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import SidebarLayout from "@/components/SidebarLayout";
 import useAuthCheck from "@/app/hooks/useAuthCheck";
 import { fetchProjects } from "@/store/projectSlice";
@@ -36,10 +36,10 @@ const ProjectPage: React.FC = () => {
   // State management for projects, pagination, and filters
   const [projects, setProjects] = useState<Project[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
-  const [sort, setSort] = useState<string>("project_id");
-  const [order, setOrder] = useState<string>("desc");
-  const [searchTerm, setSearchTerm] = useState<string>("");
+  const itemsPerPage = useRef<number>(10);
+  const sort = useRef<string>("project_id");
+  const order = useRef<string>("desc");
+  const searchTerm = useRef<string>("");  
   const [hasMore, setHasMore] = useState<boolean>(true);
 
   // Function to fetch projects based on parameters

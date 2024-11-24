@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import SidebarLayout from "@/components/SidebarLayout";
 import useAuthCheck from "@/app/hooks/useAuthCheck";
 import { useParams } from "next/navigation";
@@ -23,7 +23,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 
 const ProjectPage: React.FC = () => {
   // Use useParams to get the project_id from the URL
-  const { project_id } = useParams();
+  const { project_id } = useParams<{ project_id: string }>();
 
   useAuthCheck(["employee", "intern", "company_admin"]);
 
@@ -31,11 +31,11 @@ const ProjectPage: React.FC = () => {
 
   // State definitions for pagination, sorting, and tasks
   const [tasks, setTasks] = useState<ProjectTask[]>([]);
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(50);
-  const [sort, setSort] = useState<string>("project_id");
-  const [order, setOrder] = useState<string>("desc");
-  const [searchTerm, setSearchTerm] = useState<string>("");
+  const currentPage = useRef<number>(1);
+  const itemsPerPage = useRef<number>(50);
+  const sort = useRef<string>("project_id");
+  const order = useRef<string>("desc");
+  const searchTerm = useRef<string>("");
   const [hasChanges, setHasChanges] = useState<boolean>(false);
 
   // Fetch tasks based on the current pagination and sorting parameters
@@ -52,11 +52,8 @@ const ProjectPage: React.FC = () => {
 
         // Update task list and manage pagination state
         if (!isSameAsCurrent) {
-          setTasks([...tasks, ...newTasks]);
-        } else {
+          setTasks(newTasks);
         }
-      } else {
-        setTasks([]);
       }
     } catch (error) {
       console.error("Failed to fetch tasks:", error);
@@ -157,12 +154,12 @@ const ProjectPage: React.FC = () => {
   interface TaskFormValues {
     project_task_name: string;
     project_task_description: string;
-    project_task_progress: string;
-    project_task_priority_level: string;
+    project_task_progress?: string;
+    project_task_priority_level?: string;
   }
 
   const AddTaskButton: React.FC = () => {
-    const dispatch = useDispatch();
+    const dispatch = useDispatch<AppDispatch>();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false); // Loading state for API call
   
@@ -181,8 +178,16 @@ const ProjectPage: React.FC = () => {
     const onSubmit = async (data: TaskFormValues) => {
       setIsLoading(true); // Show loading spinner while API request is in progress
   
+      // Convert project_id to number
+      const projectId = Number(project_id);
+
+      if (isNaN(projectId)) {
+          console.error('Invalid project ID');
+          return;
+      }
+
       try {
-        await dispatch(createProjectTask({ projectId: project_id, data }));
+        await dispatch(createProjectTask({ projectId, data }));
         setIsDialogOpen(false);
         setTasks([]);
         await fetchData({ projectId: project_id, page: 1, perPage: itemsPerPage, sort, order, search: searchTerm });

@@ -1,12 +1,21 @@
-// ApexChart Component as Functional Component
 import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
+import { ApexOptions } from 'apexcharts';
 
-// Dynamically import the ReactApexChart to avoid issues with SSR in Next.js
+// Dynamically import the ReactApexChart to avoid SSR issues
 const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
+type TooltipOptions = {
+  w: {
+    globals: {
+      series: number[][];
+    };
+  };
+  seriesIndex: number;
+  dataPointIndex: number;
+};
+
 const ApexChart = () => {
-  // Set up series and options using useState
   const [series] = useState([
     {
       name: "Current Attendance Streak",
@@ -22,7 +31,7 @@ const ApexChart = () => {
     }
   ]);
 
-  const [options] = useState({
+  const [options] = useState<ApexOptions>({
     chart: {
       height: 350,
       type: 'line',
@@ -39,8 +48,13 @@ const ApexChart = () => {
       align: 'left'
     },
     legend: {
-      tooltipHoverFormatter: function (val, opts) {
-        return val + ' - <strong>' + opts.w.globals.series[opts.seriesIndex][opts.dataPointIndex] + '</strong>';
+      tooltipHoverFormatter: function (val: string, opts: TooltipOptions): string {
+        return (
+          val +
+          ' - <strong>' +
+          opts.w.globals.series[opts.seriesIndex][opts.dataPointIndex] +
+          '</strong>'
+        );
       }
     },
     markers: {
@@ -55,9 +69,9 @@ const ApexChart = () => {
     },
     tooltip: {
       y: [
-        { title: { formatter: val => `${val} (mins)` } },
-        { title: { formatter: val => `${val} per session` } },
-        { title: { formatter: val => val } }
+        { title: { formatter: (val: string) => `${val} (mins)` } },
+        { title: { formatter: (val: string) => `${val} per session` } },
+        { title: { formatter: (val: string) => `${val}` } }
       ]
     },
     grid: { borderColor: '#f1f1f1' }
