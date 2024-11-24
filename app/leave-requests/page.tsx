@@ -8,7 +8,7 @@ import useAuthCheck from '@/app/hooks/useAuthCheck';
 import SidebarLayout from '@/components/SidebarLayout';
 import DataTable from '@/components/DataTable';
 import Button from '@/components/Button';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, Resolver } from 'react-hook-form';
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import Dialog from '@/components/Dialog';
@@ -19,7 +19,7 @@ import TextAreaField from '@/components/TextAreaField';
 interface LeaveRequestFormData {
   dtr_absence_date: Date;
   dtr_absence_reason: string;
-  refreshData: () => Promise<void>;
+  refreshData?: () => Promise<void>;
 }
 
 // Validation schema using Yup
@@ -39,10 +39,13 @@ interface LeaveRequestFormDialogProps {
   refreshData: () => Promise<void>;
 }
 
+// Exclude `refreshData` from the type passed to useForm
+type ValidatedLeaveRequestFormData = Omit<LeaveRequestFormData, 'refreshData'>;
+
 const LeaveRequestFormDialog: React.FC<LeaveRequestFormDialogProps> = ({ isDialogOpen, closeDialog, refreshData }) => {
-  const dispatch = useDispatch();
-  const { control, handleSubmit, formState: { errors } } = useForm<LeaveRequestFormData>({
-    resolver: yupResolver(validationSchema),
+  const dispatch = useDispatch<AppDispatch>();
+  const { control, handleSubmit, formState: { errors } } = useForm<ValidatedLeaveRequestFormData>({
+    resolver: yupResolver(validationSchema) as Resolver<ValidatedLeaveRequestFormData>,
   });
 
   // Update the onSubmit function to dispatch the storeLeaveRequest action
@@ -78,6 +81,7 @@ const LeaveRequestFormDialog: React.FC<LeaveRequestFormDialogProps> = ({ isDialo
               required
               error={errors.dtr_absence_date?.message}
               {...field}
+              value={field.value ? field.value.toISOString().split('T')[0] : ''}
             />
           )}
         />
